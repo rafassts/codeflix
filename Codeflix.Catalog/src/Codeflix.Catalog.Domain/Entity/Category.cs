@@ -6,7 +6,7 @@ public class Category
     public Guid Id { get; private set; }
     public string Name { get; private set; }
     public string Description { get; private set; }
-    public Boolean IsActive { get; private set; }
+    public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
 
     public Category(string name, string description, bool isActive = true)
@@ -16,6 +16,25 @@ public class Category
         Description = description;
         IsActive = isActive;
         CreatedAt = DateTime.Now;
+        Validate();
+    }
+
+    public void Activate()
+    {
+        IsActive = true;
+        Validate();
+    }
+
+    public void Deactivate()
+    {
+        IsActive = false;
+        Validate();
+    }
+    
+    public void Update(string name, string? description = null)
+    {
+        Name= name;
+        Description = description ?? Description;
         Validate();
     }
 
@@ -36,4 +55,5 @@ public class Category
         if (Description.Length > 10000)
             throw new EntityValidationException($"{nameof(Description)} should have no more than 10000 characters");
     }   
+
 }
