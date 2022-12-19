@@ -1,5 +1,4 @@
-﻿using Codeflix.Catalog.Domain.Exceptions;
-using Codeflix.Catalog.Domain.SeedWork;
+﻿using Codeflix.Catalog.Domain.SeedWork;
 using Codeflix.Catalog.Domain.Validation;
 
 namespace Codeflix.Catalog.Domain.Entity;
@@ -41,9 +40,9 @@ public class Category : AggregateRoot
     public void Validate()
     {
         DomainValidation.NotNullOrEmpty(Name, nameof(Name));  
-        DomainValidation.NotNull(Description, nameof(Description));   
         DomainValidation.MinLength(Name,3,nameof(Name));
         DomainValidation.MaxLength(Name, 250, nameof(Name));
+        DomainValidation.NotNull(Description, nameof(Description));
         DomainValidation.MaxLength(Description, 10000, nameof(Description));
     }   
 
