@@ -1,4 +1,5 @@
 ﻿using Codeflix.Catalog.Domain.Entity;
+using Codeflix.Catalog.Domain.Repository;
 using FluentAssertions;
 using Moq;
 using UseCases = Codeflix.Catalog.Application.UseCases.CreateCategory;
@@ -24,7 +25,7 @@ public class CreateCategoryTest
         output.Description.Should().Be("Description");
         output.IsActive.Should().Be(true);
         (output.CreatedAt != null && output.CreatedAt != default(DateTime)).Should.BeTrue();
-        repositoryMock.Verify(repo => repo.Create(It.IsAny<Category>(), It.IsAny<CancellationToken>()), Times.Once);
+        repositoryMock.Verify(repo => repo.Insert(It.IsAny<Category>(), It.IsAny<CancellationToken>()), Times.Once);
         unitOfWorkMock.Verify(uow => uow.Commit(It.IsAny<CancellationToken>()), Times.Once);
 
     }
