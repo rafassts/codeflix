@@ -2,7 +2,6 @@
 using Codeflix.Catalog.Domain.Entity;
 using Codeflix.Catalog.Domain.Exceptions;
 using Codeflix.Catalog.UnitTests.Application.CreateCategory;
-using Codeflix.Catalog.UnitTests.Domain.Entity.Category;
 using FluentAssertions;
 using Moq;
 using UseCases = Codeflix.Catalog.Application.UseCases.Category.CreateCategory;
