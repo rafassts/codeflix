@@ -1,8 +1,9 @@
 ﻿namespace Codeflix.Catalog.UnitTests.Application.DeleteCategory;
 
-using Codeflix.Catalog.Domain.Entity;
+using Codeflix.Catalog.Application.Exceptions;
+using Codeflix.Catalog.Application.UseCases.Category.DeleteCategory;
+using FluentAssertions;
 using Moq;
-using UseCase = Codeflix.Catalog.Application.UseCases.Category.DeleteCategory;
 
 [Collection(nameof(DeleteCategoryTestFixture))]
 public class DeleteCategoryTest
@@ -14,7 +15,7 @@ public class DeleteCategoryTest
         _fixture=fixture;
     }
 
-    [Fact(DisplayName = "")]
+    [Fact(DisplayName = nameof(DeleteCategory))]
     [Trait("Application", "Delete Category - Use Cases")]
     public async void DeleteCategory()
     {
@@ -23,7 +24,7 @@ public class DeleteCategoryTest
         var validCategory = _fixture.GetValidCategory();
         var input = new DeleteCategoryInput(validCategory.Id);
         repo.Setup(x => x.Get(validCategory.Id, It.IsAny<CancellationToken>())).ReturnsAsync(validCategory);
-        var useCase = new DeleteCategory(repo, uow);
+        var useCase = new DeleteCategory(repo.Object, uow.Object);
 
         await useCase.Handle(input, CancellationToken.None);
 
@@ -40,5 +41,24 @@ public class DeleteCategoryTest
         uow.Verify(uow => uow.Commit(
             It.IsAny<CancellationToken>()),
             Times.Once);
+    }
+
+    [Fact(DisplayName =nameof(TrowWenCategoryNotFound))]
+    [Trait("Application", "Delete Category - Use Cases")]
+    public async void TrowWenCategoryNotFound()
+    {
+        var repo = _fixture.GetRepositoryMock();
+        var uow = _fixture.GetUnitOfWorkMock();
+        var id = Guid.NewGuid();
+        var input = new DeleteCategoryInput(id);
+       
+        repo.Setup(x => x.Get(id, It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new NotFoundException($"Category {id} not found"));
+
+        var useCase = new DeleteCategory(repo.Object, uow.Object);
+
+        var task = async() => await useCase.Handle(input, CancellationToken.None);
+
+        await task.Should().ThrowAsync<NotFoundException>();
     }
 }
