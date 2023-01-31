@@ -21,11 +21,12 @@ public class UpdateCategory : IUpdateCategory
         //decisão de arquitetura, vai gerar exception caso não encontre
         var category = await _categoryRepository.Get(request.Id, cancellationToken);
 
+        //se description vier null, já vai manter o que está
         category.Update(request.Name, request.Description);
 
-        if(request.IsActive != category.IsActive)
+        if( request.IsActive != null && request.IsActive != category.IsActive)
         {
-            if (request.IsActive)
+            if ((bool)request.IsActive)
                 category.Activate();
             else
                 category.Deactivate();
