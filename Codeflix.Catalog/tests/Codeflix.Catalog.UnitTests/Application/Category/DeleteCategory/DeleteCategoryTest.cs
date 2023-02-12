@@ -1,4 +1,4 @@
-﻿namespace Codeflix.Catalog.UnitTests.Application.DeleteCategory;
+﻿namespace Codeflix.Catalog.UnitTests.Application.Category.DeleteCategory;
 
 using Codeflix.Catalog.Application.Exceptions;
 using Codeflix.Catalog.Application.UseCases.Category.DeleteCategory;
@@ -12,7 +12,7 @@ public class DeleteCategoryTest
 
     public DeleteCategoryTest(DeleteCategoryTestFixture fixture)
     {
-        _fixture=fixture;
+        _fixture = fixture;
     }
 
     [Fact(DisplayName = nameof(DeleteCategory))]
@@ -21,7 +21,7 @@ public class DeleteCategoryTest
     {
         var repo = _fixture.GetRepositoryMock();
         var uow = _fixture.GetUnitOfWorkMock();
-        var validCategory = _fixture.GetValidCategory();
+        var validCategory = _fixture.GetExampleCategory();
         var input = new DeleteCategoryInput(validCategory.Id);
         repo.Setup(x => x.Get(validCategory.Id, It.IsAny<CancellationToken>())).ReturnsAsync(validCategory);
         var useCase = new DeleteCategory(repo.Object, uow.Object);
@@ -43,7 +43,7 @@ public class DeleteCategoryTest
             Times.Once);
     }
 
-    [Fact(DisplayName =nameof(TrowWenCategoryNotFound))]
+    [Fact(DisplayName = nameof(TrowWenCategoryNotFound))]
     [Trait("Application", "Delete Category - Use Cases")]
     public async void TrowWenCategoryNotFound()
     {
@@ -51,13 +51,13 @@ public class DeleteCategoryTest
         var uow = _fixture.GetUnitOfWorkMock();
         var id = Guid.NewGuid();
         var input = new DeleteCategoryInput(id);
-       
+
         repo.Setup(x => x.Get(id, It.IsAny<CancellationToken>()))
             .ThrowsAsync(new NotFoundException($"Category {id} not found"));
 
         var useCase = new DeleteCategory(repo.Object, uow.Object);
 
-        var task = async() => await useCase.Handle(input, CancellationToken.None);
+        var task = async () => await useCase.Handle(input, CancellationToken.None);
 
         await task.Should().ThrowAsync<NotFoundException>();
     }

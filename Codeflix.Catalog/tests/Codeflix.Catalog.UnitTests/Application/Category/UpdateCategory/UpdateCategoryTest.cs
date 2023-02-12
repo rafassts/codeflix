@@ -1,13 +1,13 @@
 ﻿using Codeflix.Catalog.Application.Exceptions;
 using Codeflix.Catalog.Application.UseCases.Category.Common;
 using Codeflix.Catalog.Application.UseCases.Category.UpdateCategory;
-using Codeflix.Catalog.Domain.Entity;
 using Codeflix.Catalog.Domain.Exceptions;
 using FluentAssertions;
 using Moq;
+using DomainEntity = Codeflix.Catalog.Domain.Entity;
 using UseCase = Codeflix.Catalog.Application.UseCases.Category.UpdateCategory;
 
-namespace Codeflix.Catalog.UnitTests.Application.UpdateCategory;
+namespace Codeflix.Catalog.UnitTests.Application.Category.UpdateCategory;
 
 [Collection(nameof(UpdateCategoryTestFixture))]
 public class UpdateCategoryTest
@@ -15,7 +15,7 @@ public class UpdateCategoryTest
     private readonly UpdateCategoryTestFixture _fixture;
 
     public UpdateCategoryTest(UpdateCategoryTestFixture fixture)
-        => _fixture=fixture;
+        => _fixture = fixture;
 
     [Theory(DisplayName = nameof(UpdateCategory))]
     [Trait("Application", "Update Category - Use cases")]
@@ -23,17 +23,17 @@ public class UpdateCategoryTest
         nameof(UpdateCategoryTestDataGenerator.GetGategoriesToUpdate),
         parameters: 10,
         MemberType = typeof(UpdateCategoryTestDataGenerator))]
-    public async void UpdateCategory(Category exampleCategory, UseCase.UpdateCategoryInput input)
+    public async void UpdateCategory(DomainEntity.Category exampleCategory, UpdateCategoryInput input)
     {
         var repo = _fixture.GetRepositoryMock();
         var uow = _fixture.GetUnitOfWorkMock();
-        
-        repo.Setup(x => x.Get(exampleCategory.Id,It.IsAny<CancellationToken>())).ReturnsAsync(exampleCategory);
+
+        repo.Setup(x => x.Get(exampleCategory.Id, It.IsAny<CancellationToken>())).ReturnsAsync(exampleCategory);
 
         var useCase = new UseCase.UpdateCategory(repo.Object, uow.Object);
 
         CategoryModelOutput output = await useCase.Handle(input, CancellationToken.None);
-        
+
         output.Should().NotBeNull();
         output.Name.Should().Be(input.Name);
         output.Description.Should().Be(input.Description);
@@ -55,7 +55,7 @@ public class UpdateCategoryTest
             Times.Once);
     }
 
-    [Fact(DisplayName =nameof(ThrowWhenCategoryNotFound))]
+    [Fact(DisplayName = nameof(ThrowWhenCategoryNotFound))]
     [Trait("Application", "Update Category - Use cases")]
     public async Task ThrowWhenCategoryNotFound()
     {
@@ -80,7 +80,7 @@ public class UpdateCategoryTest
         nameof(UpdateCategoryTestDataGenerator.GetGategoriesToUpdate),
         parameters: 10,
         MemberType = typeof(UpdateCategoryTestDataGenerator))]
-    public async void UpdateCategoryNoActiveParameter(Category exampleCategory, UseCase.UpdateCategoryInput exampleInput)
+    public async void UpdateCategoryNoActiveParameter(DomainEntity.Category exampleCategory, UpdateCategoryInput exampleInput)
     {
         var input = new UpdateCategoryInput(exampleInput.Id, exampleInput.Name, exampleInput.Description);
         var repo = _fixture.GetRepositoryMock();
@@ -119,7 +119,7 @@ public class UpdateCategoryTest
         nameof(UpdateCategoryTestDataGenerator.GetGategoriesToUpdate),
         parameters: 10,
         MemberType = typeof(UpdateCategoryTestDataGenerator))]
-    public async void UpdateCategoryOnlyNameParameter(Category exampleCategory, UseCase.UpdateCategoryInput exampleInput)
+    public async void UpdateCategoryOnlyNameParameter(DomainEntity.Category exampleCategory, UpdateCategoryInput exampleInput)
     {
         var input = new UpdateCategoryInput(exampleInput.Id, exampleInput.Name);
         var repo = _fixture.GetRepositoryMock();
@@ -170,7 +170,7 @@ public class UpdateCategoryTest
         repo.Setup(x => x.Get(exampleCategory.Id, It.IsAny<CancellationToken>())).ReturnsAsync(exampleCategory);
         var useCase = new UseCase.UpdateCategory(repo.Object, uow.Object);
 
-        var task = async() => await useCase.Handle(input,CancellationToken.None);
+        var task = async () => await useCase.Handle(input, CancellationToken.None);
 
         await task.Should().ThrowAsync<EntityValidationException>().WithMessage(exceptionMessage);
 

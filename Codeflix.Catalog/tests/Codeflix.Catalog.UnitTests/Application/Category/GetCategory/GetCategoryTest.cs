@@ -3,7 +3,7 @@ using Moq;
 using UseCase = Codeflix.Catalog.Application.UseCases.Category.GetCategory;
 using Codeflix.Catalog.Application.Exceptions;
 
-namespace Codeflix.Catalog.UnitTests.Application.GetCategory;
+namespace Codeflix.Catalog.UnitTests.Application.Category.GetCategory;
 
 [Collection(nameof(GetCategoryTestFixture))]
 public class GetCategoryTest
@@ -12,18 +12,18 @@ public class GetCategoryTest
 
     public GetCategoryTest(GetCategoryTestFixture fixture)
     {
-        _fixture=fixture;
+        _fixture = fixture;
     }
 
     [Fact(DisplayName = nameof(GetCategory))]
-    [Trait("Application","Get Category - Use Cases")]
+    [Trait("Application", "Get Category - Use Cases")]
     public async Task GetCategory()
     {
         var repo = _fixture.GetRepositoryMock();
-        var exampleCategory = _fixture.GetValidCategory();
-       
+        var exampleCategory = _fixture.GetExampleCategory();
+
         repo.Setup(x => x.Get(It.IsAny<Guid>(), It.IsAny<CancellationToken>())).ReturnsAsync(exampleCategory);
-       
+
         var input = new UseCase.GetCategoryInput(exampleCategory.Id);
         var usecase = new UseCase.GetCategory(repo.Object);
 
@@ -35,7 +35,7 @@ public class GetCategoryTest
             Times.Once);
 
         output.Should().NotBeNull();
-        output.Id.Should().Be(exampleCategory.Id);  
+        output.Id.Should().Be(exampleCategory.Id);
         output.Name.Should().Be(exampleCategory.Name);
         output.Description.Should().Be(exampleCategory.Description);
         output.IsActive.Should().Be(exampleCategory.IsActive);

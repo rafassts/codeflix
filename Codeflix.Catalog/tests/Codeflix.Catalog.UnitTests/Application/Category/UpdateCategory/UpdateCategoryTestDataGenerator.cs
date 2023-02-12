@@ -1,6 +1,4 @@
-﻿using Codeflix.Catalog.Application.UseCases.Category.UpdateCategory;
-
-namespace Codeflix.Catalog.UnitTests.Application.UpdateCategory;
+﻿namespace Codeflix.Catalog.UnitTests.Application.Category.UpdateCategory;
 public class UpdateCategoryTestDataGenerator
 {
     public static IEnumerable<object[]> GetGategoriesToUpdate(int times = 10)

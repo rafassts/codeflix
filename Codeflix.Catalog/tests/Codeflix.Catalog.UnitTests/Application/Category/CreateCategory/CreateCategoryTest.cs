@@ -1,12 +1,11 @@
 ﻿using Codeflix.Catalog.Application.UseCases.Category.CreateCategory;
-using Codeflix.Catalog.Domain.Entity;
 using Codeflix.Catalog.Domain.Exceptions;
-using Codeflix.Catalog.UnitTests.Application.CreateCategory;
 using FluentAssertions;
 using Moq;
 using UseCases = Codeflix.Catalog.Application.UseCases.Category.CreateCategory;
+using DomainEntity = Codeflix.Catalog.Domain.Entity;
 
-namespace Codeflix.Catalog.UnitTests.Application;
+namespace Codeflix.Catalog.UnitTests.Application.Category.CreateCategory;
 
 [Collection(nameof(CreateCategoryTestFixture))]
 public class CreateCategoryTest
@@ -16,7 +15,7 @@ public class CreateCategoryTest
 
     public CreateCategoryTest(CreateCategoryTestFixture fixture)
     {
-        _fixture=fixture;
+        _fixture = fixture;
     }
 
     [Fact(DisplayName = nameof(CreateCategory))]
@@ -25,7 +24,7 @@ public class CreateCategoryTest
     {
 
         var repoMock = _fixture.GetRepositoryMock();
-        var uowMock  = _fixture.GetUnitOfWorkMock();
+        var uowMock = _fixture.GetUnitOfWorkMock();
 
         var useCase = new UseCases.CreateCategory(uowMock.Object, repoMock.Object);
 
@@ -35,17 +34,17 @@ public class CreateCategoryTest
 
         output.Should().NotBeNull();
         output.Id.Should().NotBeEmpty();
-        output.Name.Should().Be(input.Name) ;
+        output.Name.Should().Be(input.Name);
         output.Description.Should().Be(input.Description);
         output.IsActive.Should().Be(input.IsActive);
-        output.CreatedAt.Should().NotBeSameDateAs(default(DateTime));
+        output.CreatedAt.Should().NotBeSameDateAs(default);
         repoMock.Verify(repo => repo.Insert(
-            It.IsAny<Category>(), 
-            It.IsAny<CancellationToken>()), 
+            It.IsAny<DomainEntity.Category>(),
+            It.IsAny<CancellationToken>()),
             Times.Once);
 
         uowMock.Verify(uow => uow.Commit(
-            It.IsAny<CancellationToken>()), 
+            It.IsAny<CancellationToken>()),
             Times.Once);
     }
 
@@ -53,7 +52,7 @@ public class CreateCategoryTest
     [Trait("Application", "Throw Error CreateCategory Use Cases")]
     [MemberData(
         nameof(CreateCategoryTestDataGenerator.GetInvalidInputs),
-        parameters:24,
+        parameters: 24,
         MemberType = typeof(CreateCategoryTestDataGenerator)
     )]
     public async void ThrowWhenCantInstantiateCategory(CreateCategoryInput input, string exceptionMessage)
@@ -62,7 +61,7 @@ public class CreateCategoryTest
             _fixture.GetUnitOfWorkMock().Object,
             _fixture.GetRepositoryMock().Object);
 
-       Func<Task> task = async () => await useCase.Handle(input, CancellationToken.None);
+        Func<Task> task = async () => await useCase.Handle(input, CancellationToken.None);
 
         await task.Should()
             .ThrowAsync<EntityValidationException>()
@@ -87,7 +86,7 @@ public class CreateCategoryTest
         output.Name.Should().Be(input.Name);
         output.Description.Should().Be("");
         output.IsActive.Should().BeTrue();
-        output.CreatedAt.Should().NotBeSameDateAs(default(DateTime));
+        output.CreatedAt.Should().NotBeSameDateAs(default);
     }
 
     [Fact(DisplayName = nameof(CreateCategoryWithOnlyNameAndDescription))]
@@ -100,7 +99,7 @@ public class CreateCategoryTest
         var useCase = new UseCases.CreateCategory(uowMock.Object, repoMock.Object);
 
         var input = new CreateCategoryInput(
-            _fixture.GetValidCategoryName(), 
+            _fixture.GetValidCategoryName(),
             _fixture.GetValidCategoryDescription());
 
         var output = await useCase.Handle(input, CancellationToken.None);
@@ -110,7 +109,7 @@ public class CreateCategoryTest
         output.Name.Should().Be(input.Name);
         output.Description.Should().Be(input.Description);
         output.IsActive.Should().BeTrue();
-        output.CreatedAt.Should().NotBeSameDateAs(default(DateTime));
+        output.CreatedAt.Should().NotBeSameDateAs(default);
     }
 
 }

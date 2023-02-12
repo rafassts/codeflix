@@ -1,4 +1,4 @@
-﻿namespace Codeflix.Catalog.UnitTests.Application.CreateCategory;
+﻿namespace Codeflix.Catalog.UnitTests.Application.Category.CreateCategory;
 public class CreateCategoryTestDataGenerator
 {
     public static IEnumerable<object[]> GetInvalidInputs(int times = 12)
@@ -13,7 +13,7 @@ public class CreateCategoryTestDataGenerator
         for (int index = 0; index < times; index++)
         {
             //0,1,2,3,0,1,2,3...
-            switch(index % totalInvalidCases)
+            switch (index % totalInvalidCases)
             {
                 case 0:
                     invalidInputList.Add(new object[]

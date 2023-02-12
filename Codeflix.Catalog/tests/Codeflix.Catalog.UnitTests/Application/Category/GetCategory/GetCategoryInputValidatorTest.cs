@@ -1,7 +1,7 @@
 ﻿using Codeflix.Catalog.Application.UseCases.Category.GetCategory;
 using FluentAssertions;
 
-namespace Codeflix.Catalog.UnitTests.Application.GetCategory;
+namespace Codeflix.Catalog.UnitTests.Application.Category.GetCategory;
 
 [Collection(nameof(GetCategoryTestFixture))]
 public class GetCategoryInputValidatorTest
@@ -9,10 +9,10 @@ public class GetCategoryInputValidatorTest
     private readonly GetCategoryTestFixture _fixture;
 
     public GetCategoryInputValidatorTest(GetCategoryTestFixture fixture)
-        =>  _fixture=fixture;
+        => _fixture = fixture;
 
     [Fact(DisplayName = nameof(ValidationOk))]
-    [Trait("Application","GetCategoryInputValidation - Usecases")]
+    [Trait("Application", "GetCategoryInputValidation - Usecases")]
     public void ValidationOk()
     {
         var validInput = new GetCategoryInput(Guid.NewGuid());
