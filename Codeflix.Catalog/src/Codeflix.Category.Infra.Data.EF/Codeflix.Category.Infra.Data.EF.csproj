@@ -7,12 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="11.5.0" />
-    <PackageReference Include="mediatr" Version="11.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="7.0.2" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Codeflix.Catalog.Application\Codeflix.Catalog.Application.csproj" />
     <ProjectReference Include="..\Codeflix.Catalog.Domain\Codeflix.Catalog.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Repositories\" />
   </ItemGroup>
 
 </Project>
