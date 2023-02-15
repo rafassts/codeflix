@@ -13,9 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codeflix.Catalog.Domain", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codeflix.Catalog.Application", "src\Codeflix.Catalog.Application\Codeflix.Catalog.Application.csproj", "{B92B737B-344D-427A-B690-256532B69728}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codeflix.Catalog.IntegrationTests", "tests\Codeflix.Catalog.IntegrationTests\Codeflix.Catalog.IntegrationTests.csproj", "{EAA5952B-AA2F-4DB1-A0C6-108B9509D131}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codeflix.Catalog.IntegrationTests", "tests\Codeflix.Catalog.IntegrationTests\Codeflix.Catalog.IntegrationTests.csproj", "{EAA5952B-AA2F-4DB1-A0C6-108B9509D131}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codeflix.Category.Infra.Data.EF", "src\Codeflix.Category.Infra.Data.EF\Codeflix.Category.Infra.Data.EF.csproj", "{0BC9BC24-8D83-4E7F-8230-7CD39F276253}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codeflix.Catalog.Infra.Data.EF", "src\Codeflix.Category.Infra.Data.EF\Codeflix.Catalog.Infra.Data.EF.csproj", "{0BC9BC24-8D83-4E7F-8230-7CD39F276253}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

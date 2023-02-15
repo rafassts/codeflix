@@ -24,7 +24,7 @@ public class DomainValidationTest
     [Trait("Domain", "Domain Validation - Validation")]
     public void NotNullThrow()
     {
-        string value = null;
+        string? value = null;
         string fieldName = Faker.Commerce.ProductName().Replace(" ", "");
         Action action =
             () => DomainValidation.NotNull(value, fieldName);

@@ -1,11 +1,11 @@
-﻿using DomainEntity = Codeflix.Catalog.Domain.Entity;
-using Microsoft.EntityFrameworkCore;
-using Codeflix.Category.Infra.Data.EF.Configurations;
+﻿using Microsoft.EntityFrameworkCore;
+using Codeflix.Catalog.Infra.Data.EF.Configurations;
+using Codeflix.Catalog.Domain.Entity;
 
-namespace Codeflix.Category.Infra.Data.EF;
+namespace Codeflix.Catalog.Infra.Data.EF;
 public class CodeflixCategoryDbContext : DbContext
 {
-    public DbSet<DomainEntity.Category> Categories => Set<DomainEntity.Category>();
+    public DbSet<Category> Categories => Set<Category>();
     public CodeflixCategoryDbContext(DbContextOptions<CodeflixCategoryDbContext> options) 
         : base(options)
     {

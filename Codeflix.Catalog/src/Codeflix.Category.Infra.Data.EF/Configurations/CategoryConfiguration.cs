@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Codeflix.Catalog.Domain.Entity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using DomainEntity = Codeflix.Catalog.Domain.Entity;
 
-namespace Codeflix.Category.Infra.Data.EF.Configurations;
+namespace Codeflix.Catalog.Infra.Data.EF.Configurations;
 internal class CategoryConfiguration
-    : IEntityTypeConfiguration<DomainEntity.Category>
+    : IEntityTypeConfiguration<Category>
 {
-    public void Configure(EntityTypeBuilder<DomainEntity.Category> builder)
+    public void Configure(EntityTypeBuilder<Category> builder)
     {
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Name).HasMaxLength(255);

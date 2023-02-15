@@ -1,4 +1,5 @@
 ﻿using Codeflix.Catalog.Domain.Entity;
+using Codeflix.Catalog.Infra.Data.EF;
 using Codeflix.Catalog.IntegrationTests.Base;
 using Microsoft.EntityFrameworkCore;
 
@@ -38,12 +39,15 @@ public class CategoryRepositoryTestFixture : BaseFixture
         GetRandomIsActive()
     );
 
-    public CodeflixCatalogDbContext CreateDbContext()
-    {
-        var dbContext = new CodeflixCatalogDbContext(
-            new DbContextOptionsBuilder<CodeflixCatalogDbContext>()
+    public List<Category> GetExampleCategoriesList(int length = 10)
+        => Enumerable.Range(1,length).Select(_ => GetExampleCategory()).ToList();
+   
+
+    public CodeflixCategoryDbContext CreateDbContext()
+        => new (
+            new DbContextOptionsBuilder<CodeflixCategoryDbContext>()
                 .UseInMemoryDatabase("integration-tests-db")
-                .Options);
-    }
+                .Options
+            );
 
 }

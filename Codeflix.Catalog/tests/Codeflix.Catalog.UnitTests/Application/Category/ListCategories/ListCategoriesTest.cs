@@ -79,6 +79,7 @@ public class ListCategoriesTest
     }
 
     [Theory(DisplayName = nameof(ListWithoutAllParameters))]
+    [Trait("Application", "ListCategories Use Cases")]
     [MemberData(
         nameof(ListCategoriesTestDataGenerator.GetInputsWithoutAllParameters),
         parameters: 12,
