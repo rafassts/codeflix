@@ -29,7 +29,7 @@ public class ListCategoriesTest
         var outputRepoSearch = new SearchOutput<DomainEntity.Category>(
                 currentPage: input.Page,
                 perPage: input.PerPage,
-                items: (IReadOnlyList<DomainEntity.Category>)categoriesExampleList,
+                items: categoriesExampleList,
                 total: new Random().Next(50, 200));
 
         repo.Setup(x => x.Search(

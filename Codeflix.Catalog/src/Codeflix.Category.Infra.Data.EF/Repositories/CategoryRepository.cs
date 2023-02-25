@@ -1,4 +1,5 @@
-﻿using Codeflix.Catalog.Domain.Entity;
+﻿using Codeflix.Catalog.Application.Exceptions;
+using Codeflix.Catalog.Domain.Entity;
 using Codeflix.Catalog.Domain.Repository;
 using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using Microsoft.EntityFrameworkCore;
@@ -20,8 +21,16 @@ public class CategoryRepository : ICategoryRepository
     }
 
     public async Task<Category> Get(Guid id, CancellationToken cancellationToken)
-        => await _categories.FindAsync(new object[] {id}, cancellationToken);
+    {
+        var category = await _categories.AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
+        //if (category == null) 
+        //    throw new NotFoundException($"Category '{id}' not found");
+        NotFoundException.ThrowIfNull(category, $"Category '{id}' not found");
+        return category!;
+    }
+        
     public async Task Insert(Category aggregate, CancellationToken cancellationToken)
         => await _categories.AddAsync(aggregate, cancellationToken);
     
@@ -32,6 +41,7 @@ public class CategoryRepository : ICategoryRepository
 
     public Task Update(Category aggregate, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        //o ef não tem update async, mas a application vai ser
+        return Task.FromResult(_categories.Update(aggregate));
     }
 }
