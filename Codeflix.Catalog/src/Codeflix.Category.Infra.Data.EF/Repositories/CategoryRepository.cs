@@ -13,11 +13,11 @@ public class CategoryRepository : ICategoryRepository
 
     public CategoryRepository(CodeflixCategoryDbContext context)
         => _context=context;  
-    
 
-    public Task Delete(Category aggregate, CancellationToken cancellationToken)
+    public Task Delete(Category aggregate, CancellationToken _)
     {
-        throw new NotImplementedException();
+        //o ef não tem delete async
+        return Task.FromResult(_categories.Remove(aggregate));
     }
 
     public async Task<Category> Get(Guid id, CancellationToken cancellationToken)
@@ -25,8 +25,6 @@ public class CategoryRepository : ICategoryRepository
         var category = await _categories.AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
-        //if (category == null) 
-        //    throw new NotFoundException($"Category '{id}' not found");
         NotFoundException.ThrowIfNull(category, $"Category '{id}' not found");
         return category!;
     }
@@ -34,14 +32,24 @@ public class CategoryRepository : ICategoryRepository
     public async Task Insert(Category aggregate, CancellationToken cancellationToken)
         => await _categories.AddAsync(aggregate, cancellationToken);
     
-    public Task<SearchOutput<Category>> Search(SearchInput input, CancellationToken cancellationToken)
+    public async Task<SearchOutput<Category>> Search(SearchInput input, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var toSkip = (input.Page - 1) * input.PerPage;
+        
+        var total = await _categories.CountAsync();
+        
+        var items = await _categories
+            .AsNoTracking()
+            .Skip(toSkip)
+            .Take(input.PerPage)
+            .ToListAsync();
+
+        return new SearchOutput<Category>(input.Page, input.PerPage, total, items);
     }
 
-    public Task Update(Category aggregate, CancellationToken cancellationToken)
+    public Task Update(Category aggregate, CancellationToken _)
     {
-        //o ef não tem update async, mas a application vai ser
+        //o ef não tem update async
         return Task.FromResult(_categories.Update(aggregate));
     }
 }

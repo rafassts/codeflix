@@ -43,11 +43,19 @@ public class CategoryRepositoryTestFixture : BaseFixture
         => Enumerable.Range(1,length).Select(_ => GetExampleCategory()).ToList();
    
 
-    public CodeflixCategoryDbContext CreateDbContext()
-        => new (
+    public CodeflixCategoryDbContext CreateDbContext(bool preserveData = false)
+    {
+        var context = new CodeflixCategoryDbContext(
             new DbContextOptionsBuilder<CodeflixCategoryDbContext>()
                 .UseInMemoryDatabase("integration-tests-db")
                 .Options
             );
+
+        //poderiamos usar o idisposable no teste, para deletar os dados em cada teste
+        if (!preserveData)
+            context.Database.EnsureDeleted();
+
+        return context;
+    }
 
 }

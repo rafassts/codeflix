@@ -15,4 +15,5 @@ public class CodeflixCategoryDbContext : DbContext
     {
         builder.ApplyConfiguration(new CategoryConfiguration());
     }
+   
 }
