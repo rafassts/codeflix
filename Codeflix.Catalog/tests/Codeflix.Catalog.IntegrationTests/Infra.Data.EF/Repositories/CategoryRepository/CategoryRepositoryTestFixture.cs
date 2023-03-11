@@ -1,4 +1,5 @@
 ﻿using Codeflix.Catalog.Domain.Entity;
+using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using Codeflix.Catalog.Infra.Data.EF;
 using Codeflix.Catalog.IntegrationTests.Base;
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +42,37 @@ public class CategoryRepositoryTestFixture : BaseFixture
 
     public List<Category> GetExampleCategoriesList(int length = 10)
         => Enumerable.Range(1,length).Select(_ => GetExampleCategory()).ToList();
-   
+
+    public List<Category> GetExampleCategoriesListWithNames(List<string> names)
+        => names.Select(name =>
+        {
+            var category = GetExampleCategory();
+            category.Update(name);
+            return category;
+        }).ToList();
+        
+    public List<Category> CloneCategoriesListOrdered(
+        List<Category> categories,
+        string orderBy, 
+        SearchOrder order)
+    {
+        var listClone = new List<Category>(categories);
+
+        //nova sintaxe do switch
+        var orderedEnumerable = (orderBy, order) switch
+        {
+            ("name", SearchOrder.Asc) => listClone.OrderBy(x => x.Name),
+            ("name", SearchOrder.Desc) => listClone.OrderByDescending(x => x.Name),
+            ("id", SearchOrder.Asc) => listClone.OrderBy(x => x.Id),
+            ("id", SearchOrder.Desc) => listClone.OrderByDescending(x => x.Id),
+            ("createdAt", SearchOrder.Asc) => listClone.OrderBy(x => x.CreatedAt),
+            ("createdAt", SearchOrder.Desc) => listClone.OrderByDescending(x => x.CreatedAt),
+            _ => listClone.OrderBy(x => x.Name) //default
+        };
+
+        return orderedEnumerable.ToList();
+
+    }
 
     public CodeflixCategoryDbContext CreateDbContext(bool preserveData = false)
     {
