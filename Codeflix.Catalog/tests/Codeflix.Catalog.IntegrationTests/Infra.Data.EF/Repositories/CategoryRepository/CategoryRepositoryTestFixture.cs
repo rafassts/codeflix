@@ -1,8 +1,6 @@
 ﻿using Codeflix.Catalog.Domain.Entity;
 using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
-using Codeflix.Catalog.Infra.Data.EF;
 using Codeflix.Catalog.IntegrationTests.Base;
-using Microsoft.EntityFrameworkCore;
 
 namespace Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.CategoryRepository;
 
@@ -73,20 +71,4 @@ public class CategoryRepositoryTestFixture : BaseFixture
         return orderedEnumerable.ToList();
 
     }
-
-    public CodeflixCategoryDbContext CreateDbContext(bool preserveData = false)
-    {
-        var context = new CodeflixCategoryDbContext(
-            new DbContextOptionsBuilder<CodeflixCategoryDbContext>()
-                .UseInMemoryDatabase("integration-tests-db")
-                .Options
-            );
-
-        //poderiamos usar o idisposable no teste, para deletar os dados em cada teste
-        if (!preserveData)
-            context.Database.EnsureDeleted();
-
-        return context;
-    }
-
 }
