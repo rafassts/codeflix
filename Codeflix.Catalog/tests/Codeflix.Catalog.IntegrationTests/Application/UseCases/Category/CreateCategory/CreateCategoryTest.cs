@@ -33,7 +33,7 @@ public class CreateCategoryTest
 
         var output = await useCase.Handle(input, CancellationToken.None);
 
-        //novo contexto para não usar o tracking  
+        //lê do banco para verificar se deu certo, novo contexto para não usar o tracking  
         var dbContext2 = _fixture.CreateDbContext(true);
         var dbCategory = await dbContext2
             .Categories
