@@ -15,10 +15,10 @@ public class BaseFixture
     //problema do paralelismo dos testes do xunit - xunit.runner.json (properties - copy always)
     //dependendo do caso, pode ser melhor criar vários bancos para usar o paralelismo,
     //concatenando um id rand no nome do banco (problema se houver muitos e muitos testes)
-    public CodeflixCategoryDbContext CreateDbContext(bool preserveData = false)
+    public CodeflixCatalogDbContext CreateDbContext(bool preserveData = false)
     {
-        var context = new CodeflixCategoryDbContext(
-            new DbContextOptionsBuilder<CodeflixCategoryDbContext>()
+        var context = new CodeflixCatalogDbContext(
+            new DbContextOptionsBuilder<CodeflixCatalogDbContext>()
                 .UseInMemoryDatabase("integration-tests-db")
                 .Options
             );

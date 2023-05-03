@@ -3,9 +3,9 @@
 namespace Codeflix.Catalog.Infra.Data.EF;
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly CodeflixCategoryDbContext _context;
+    private readonly CodeflixCatalogDbContext _context;
 
-    public UnitOfWork(CodeflixCategoryDbContext context)
+    public UnitOfWork(CodeflixCatalogDbContext context)
     {
         _context=context;
     }

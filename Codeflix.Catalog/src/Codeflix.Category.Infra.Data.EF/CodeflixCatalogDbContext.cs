@@ -3,10 +3,10 @@ using Codeflix.Catalog.Infra.Data.EF.Configurations;
 using Codeflix.Catalog.Domain.Entity;
 
 namespace Codeflix.Catalog.Infra.Data.EF;
-public class CodeflixCategoryDbContext : DbContext
+public class CodeflixCatalogDbContext : DbContext
 {
     public DbSet<Category> Categories => Set<Category>();
-    public CodeflixCategoryDbContext(DbContextOptions<CodeflixCategoryDbContext> options) 
+    public CodeflixCatalogDbContext(DbContextOptions<CodeflixCatalogDbContext> options) 
         : base(options)
     {
     }

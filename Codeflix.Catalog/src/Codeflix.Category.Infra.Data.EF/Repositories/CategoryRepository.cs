@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 namespace Codeflix.Catalog.Infra.Data.EF.Repositories;
 public class CategoryRepository : ICategoryRepository
 {
-    private readonly CodeflixCategoryDbContext _context;
+    private readonly CodeflixCatalogDbContext _context;
     private DbSet<Category> _categories 
         => _context.Set<Category>();
 
-    public CategoryRepository(CodeflixCategoryDbContext context)
+    public CategoryRepository(CodeflixCatalogDbContext context)
         => _context=context;  
 
     public Task Delete(Category aggregate, CancellationToken _)
