@@ -28,6 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Codeflix.Catalog.Api\Codeflix.Catalog.Api.csproj" />
     <ProjectReference Include="..\..\src\Codeflix.Category.Infra.Data.EF\Codeflix.Catalog.Infra.Data.EF.csproj" />
   </ItemGroup>
 

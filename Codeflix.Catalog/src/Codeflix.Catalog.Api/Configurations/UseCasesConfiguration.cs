@@ -1,4 +1,5 @@
 ﻿using Codeflix.Catalog.Application.Interfaces;
+using Codeflix.Catalog.Application.UseCases.Category.CreateCategory;
 using Codeflix.Catalog.Domain.Repository;
 using Codeflix.Catalog.Infra.Data.EF;
 using Codeflix.Catalog.Infra.Data.EF.Repositories;
@@ -11,7 +12,7 @@ public static class UseCasesConfiguration
     public static IServiceCollection AddUseCases(this IServiceCollection services)
     {
         //alteração mediatr 12
-        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
+        services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetAssembly(typeof(CreateCategory))!));
         services.AddRepositories();
         return services;
     }

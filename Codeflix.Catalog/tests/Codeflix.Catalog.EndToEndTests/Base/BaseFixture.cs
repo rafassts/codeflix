@@ -1,7 +1,7 @@
 ﻿using Bogus;
 using Codeflix.Catalog.Infra.Data.EF;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
+
 
 namespace Codeflix.Catalog.EndToEndTests.Base;
 
@@ -28,5 +28,12 @@ public class BaseFixture
                 .Options);
 
         return context;
+    }
+
+    public void CleanPersistence()
+    {
+        var context = CreateDbContext();
+        context.Database.EnsureDeleted();
+        context.Database.EnsureCreated();
     }
 }

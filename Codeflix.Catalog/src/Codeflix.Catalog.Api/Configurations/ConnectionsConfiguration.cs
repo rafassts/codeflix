@@ -24,7 +24,7 @@ public static class ConnectionsConfiguration
         //);
 
         services.AddDbContext<CodeflixCatalogDbContext>(
-            options => options.UseInMemoryDatabase("InMemory-DSV-Database"));
+            options => options.UseInMemoryDatabase("e2e-tests-db"));
 
         return services;
     }
