@@ -70,6 +70,7 @@ public class CreateCategoryApiTest : IDisposable
         output.Status.Should().Be((int)StatusCodes.Status422UnprocessableEntity);
         output.Detail.Should().Be(expectedDetail);
     }
+
     public void Dispose()
         => _fixture.CleanPersistence();
 
