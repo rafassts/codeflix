@@ -59,7 +59,7 @@ public class GetCategoryApiTest
         output!.Status.Should().Be((int)StatusCodes.Status404NotFound);
         output.Type.Should().Be("NotFound");
         output.Title.Should().Be("Not Found");
-        output.Detail.Should().Be($"Category '{randomGuid}' not found.");
+        output.Detail.Should().Be($"Category '{randomGuid}' not found");
     }
     public void Dispose()
         => _fixture.CleanPersistence();
