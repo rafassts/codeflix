@@ -35,6 +35,7 @@ public class CreateCategoryApiTest : IDisposable
         output.Id.Should().NotBeEmpty();
         output.CreatedAt.Should().NotBeSameDateAs(default);
 
+        //confirmar no banco
         var dbCategory = await _fixture.Persistence.GetById(output.Id);
 
         dbCategory.Should().NotBeNull();

@@ -18,10 +18,7 @@ public class ApiClient
         };
     }
 
-    public async Task<(HttpResponseMessage?, TOutput?)> Post<TOutput>(
-        string route,
-        object payload
-    ) where TOutput : class
+    public async Task<(HttpResponseMessage?, TOutput?)> Post<TOutput>(string route,object payload) where TOutput : class
     {
         var payloadJson = JsonSerializer.Serialize(payload,_defaultSerializeOptions);
 
@@ -52,6 +49,7 @@ public class ApiClient
                 "application/json"
             )
         );
+
         var output = await GetOutput<TOutput>(response);
         return (response, output);
     }
