@@ -35,7 +35,7 @@ public class ListCategoriesTestFixture : CategoryUseCasesBaseFixture
             _ => listClone.OrderBy(x => x.Name) //default
         };
 
-        return orderedEnumerable.ToList();
+        return orderedEnumerable.ThenBy(x => x.CreatedAt).ToList();
 
     }
 }
