@@ -30,6 +30,8 @@ public class BaseFixture
         return context;
     }
 
+    //o xunit.runner evita o paralelismo, e o idisposable limpa o banco para o outro
+    //teste pegar
     public void CleanPersistence()
     {
         var context = CreateDbContext();

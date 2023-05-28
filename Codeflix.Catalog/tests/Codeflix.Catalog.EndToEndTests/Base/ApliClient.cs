@@ -57,7 +57,7 @@ public class ApiClient
     public async Task<(HttpResponseMessage?, TOutput?)> Get<TOutput>(string route,object? queryStringParametersObject = null) 
         where TOutput : class
     {
-        var url = PrepareGetRoute(route, queryStringParametersObject);
+        var url = PrepareGetRoute(route, queryStringParametersObject); 
         var response = await _httpClient.GetAsync(url);
         var output = await GetOutput<TOutput>(response);
         return (response, output);
@@ -87,14 +87,14 @@ public class ApiClient
     {
         if (queryStringParametersObject is null)
             return route;
-        var parametersJson = JsonSerializer.Serialize(
-            queryStringParametersObject,
-            _defaultSerializeOptions
-        );
+       
+        var parametersJson = JsonSerializer.Serialize(queryStringParametersObject,_defaultSerializeOptions);
 
-        var parametersDictionary = Newtonsoft.Json.JsonConvert
-            .DeserializeObject<Dictionary<string, string>>(parametersJson);
+        //transforma objeto no json e depois em um dicionário
+        //o json nativo não consegue transformar os campos em string,string do dicionário
+        var parametersDictionary = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(parametersJson);
 
+        //transforma um dicionário em query string
         return QueryHelpers.AddQueryString(route, parametersDictionary!);
     }
 }
