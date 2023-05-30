@@ -252,7 +252,7 @@ public class ListCategoriesApiTest : IDisposable
             outputItem.Id.Should().Be(exampleItem.Id);
             outputItem.Description.Should().Be(exampleItem.Description);
             outputItem.IsActive.Should().Be(exampleItem.IsActive);
-            outputItem.CreatedAt.Should().Be(exampleItem.CreatedAt);
+            outputItem.CreatedAt.TrimMillisseconds().Should().Be(exampleItem.CreatedAt.TrimMillisseconds());
         }
     }
 

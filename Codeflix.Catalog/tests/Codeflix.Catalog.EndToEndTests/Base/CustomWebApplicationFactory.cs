@@ -9,6 +9,7 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        //pega as configurações do appsettings
         builder.UseEnvironment("EndToEndTest");
         
         builder.ConfigureServices(services => {
@@ -16,7 +17,7 @@ public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStar
             var serviceProvider = services.BuildServiceProvider();
             using var scope = serviceProvider.CreateScope();
 
-            //deleta e cria um novo banco para os testes
+            //sempre criar um novo banco
             var context = scope.ServiceProvider.GetService<CodeflixCatalogDbContext>();
             ArgumentNullException.ThrowIfNull(context);
             context.Database.EnsureDeleted();

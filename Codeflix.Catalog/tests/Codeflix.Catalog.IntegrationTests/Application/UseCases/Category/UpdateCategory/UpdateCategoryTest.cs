@@ -51,7 +51,7 @@ public class UpdateCategoryTest
         dbCategory.Should().NotBeNull();
         dbCategory!.Name.Should().Be(input.Name);
         dbCategory.Description.Should().Be(input.Description);
-        dbCategory.IsActive.Should().Be((bool) input.IsActive);
+        dbCategory.IsActive.Should().Be((bool) input.IsActive!);
         dbCategory.CreatedAt.Should().Be(output.CreatedAt);
 
         output.Should().NotBeNull();
