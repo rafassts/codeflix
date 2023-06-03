@@ -6,7 +6,9 @@ using Codeflix.Catalog.Infra.Data.EF.Repositories;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Newtonsoft.Json;
 using System.Net;
+using Xunit.Abstractions;
 
 namespace Codeflix.Catalog.EndToEndTests.Api.Category.ListCategories;
 
@@ -14,9 +16,13 @@ namespace Codeflix.Catalog.EndToEndTests.Api.Category.ListCategories;
 public class ListCategoriesApiTest : IDisposable
 {
     private readonly ListCategoriesApiTestFixture _fixture;
+    private readonly ITestOutputHelper _output;
 
-    public ListCategoriesApiTest(ListCategoriesApiTestFixture fixture)
-        => _fixture=fixture;
+    public ListCategoriesApiTest(ListCategoriesApiTestFixture fixture, ITestOutputHelper output)
+    {
+        _fixture=fixture;
+        _output=output;
+    }
 
     [Fact(DisplayName = nameof(ListCategoriesAndTotalDefault))]
     [Trait("EndToEnd/API", "Category/List - Endpoints")]
@@ -213,8 +219,6 @@ public class ListCategoriesApiTest : IDisposable
     [InlineData("name", "desc")]
     [InlineData("id", "asc")]
     [InlineData("id", "desc")]
-    [InlineData("createdAt", "asc")]
-    [InlineData("createdAt", "desc")]
     [InlineData("", "asc")]
     public async Task ListOrdered(string orderBy, string order)
     {
@@ -241,6 +245,21 @@ public class ListCategoriesApiTest : IDisposable
             input.Sort,
             input.Dir);
 
+        //problema na ordenação, vamos ver como está vindo com o test helper - daria para ver no debug, mas facilita
+        //criados no mesmo horário - banco em memória diferenciava pela última casa, mas no banco no container não
+        var count = 0;
+        var expectedArray = expectedOrderedList
+            .Select(x => $"{++count} {x.Name} {x.CreatedAt} {JsonConvert.SerializeObject(x)}");
+
+        count = 0;
+        var outputArray = output.Items
+           .Select(x => $"{++count} {x.Name} {x.CreatedAt} {JsonConvert.SerializeObject(x)}");
+
+        _output.WriteLine("Expects...");
+        _output.WriteLine(String.Join('\n',expectedArray));
+        _output.WriteLine("Outputs...");
+        _output.WriteLine(String.Join('\n', outputArray));
+
 
         for (int indice = 0; indice < expectedOrderedList.Count; indice++)
         {
@@ -253,6 +272,58 @@ public class ListCategoriesApiTest : IDisposable
             outputItem.Description.Should().Be(exampleItem.Description);
             outputItem.IsActive.Should().Be(exampleItem.IsActive);
             outputItem.CreatedAt.TrimMillisseconds().Should().Be(exampleItem.CreatedAt.TrimMillisseconds());
+        }
+    }
+
+
+    [Theory(DisplayName = nameof(ListOrderedDates))]
+    [Trait("Integration/Application", "ListCategories - Use Cases")]
+    [InlineData("createdAt", "asc")]
+    [InlineData("createdAt", "desc")]
+    public async Task ListOrderedDates(string orderBy, string order)
+    {
+        var exampleCategoriesList = _fixture.GetExampleCategoriesList(10);
+        await _fixture.Persistence.InsertList(exampleCategoriesList);
+        var inputOrder = order == "asc" ? SearchOrder.Asc : SearchOrder.Desc;
+
+        var input = new ListCategoriesInput(page: 1, perPage: 20, sort: orderBy, dir: inputOrder);
+
+        var (response, output) = await _fixture
+            .ApiClient.Get<ListCategoriesOutput>($"/categories", input);
+
+        response.Should().NotBeNull();
+        response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status200OK);
+        output.Should().NotBeNull();
+        output!.Should().NotBeNull();
+        output!.Total.Should().Be(exampleCategoriesList.Count);
+        output.Items.Should().HaveCount(exampleCategoriesList.Count);
+        output.Page.Should().Be(input.Page);
+        output.PerPage.Should().Be(input.PerPage);
+
+        //testa se está ordenado por data, pois pode ser igual até os segundos, então tem que ser maior ou igual 
+        //para asc ou menor ou igual para desc
+        DateTime? lastItemDate = null;
+        foreach (var outputItem in output.Items)
+        {
+            var exampleItem = exampleCategoriesList.FirstOrDefault(x => x.Id == outputItem.Id);
+            exampleItem.Should().NotBeNull();
+
+            outputItem!.Id.Should().Be(exampleItem!.Id);
+            outputItem.Name.Should().Be(exampleItem.Name);
+            outputItem.Description.Should().Be(exampleItem.Description);
+            outputItem.IsActive.Should().Be(exampleItem.IsActive);
+            outputItem.CreatedAt.TrimMillisseconds().Should().Be(exampleItem.CreatedAt.TrimMillisseconds());
+
+            if (lastItemDate != null)
+            {
+                if (order == "asc")
+                    Assert.True(outputItem.CreatedAt >= lastItemDate);
+                else
+                    Assert.True(outputItem.CreatedAt <= lastItemDate);
+
+            }
+
+            lastItemDate = outputItem.CreatedAt;
         }
     }
 
