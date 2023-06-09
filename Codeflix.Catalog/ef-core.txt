@@ -1,0 +1,18 @@
+instalação global do ef-core cli
+
+https://learn.microsoft.com/en-us/ef/core/cli/dotnet
+
+
+dotnet tool install --global dotnet-ef
+dotnet tool update --global dotnet-ef
+
+pediu para instalar o pacote Microsoft.EntityFrameworkCore.Design na API
+
+
+antes de rodar, vamos mudar o ambiente para pegar o localhost,pois o ambiente de desenvolvimento está na rede do docker
+$env:ASPNETCORE_ENVIRONMENT='Migrations'
+
+dotnet ef migrations add create-category-table -s .\src\Codeflix.Catalog.Api -p .\src\Codeflix.Category.Infra.Data.EF\ -v
+
+dotnet ef database update -s .\src\Codeflix.Catalog.Api -p .\src\Codeflix.Category.Infra.Data.EF\ -v
+
