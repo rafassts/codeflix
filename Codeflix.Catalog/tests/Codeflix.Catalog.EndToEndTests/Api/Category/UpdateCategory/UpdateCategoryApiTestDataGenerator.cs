@@ -15,7 +15,7 @@ public class UpdateCategoryApiTestDataGenerator
             switch (index % totalInvalidCases)
             {
                 case 0:
-                    var input1 = fixture.GetExampleInput(null);
+                    var input1 = fixture.GetExampleInput();
                     input1.Name = fixture.GetInvalidNameTooShort();
                     invalidInputsList.Add(new object[] {
                         input1,
@@ -23,7 +23,7 @@ public class UpdateCategoryApiTestDataGenerator
                     });
                     break;
                 case 1:
-                    var input2 = fixture.GetExampleInput(null);
+                    var input2 = fixture.GetExampleInput();
                     input2.Name = fixture.GetInvalidNameTooLong();
                     invalidInputsList.Add(new object[] {
                         input2,
@@ -31,7 +31,7 @@ public class UpdateCategoryApiTestDataGenerator
                     });
                     break;
                 case 2:
-                    var input3 = fixture.GetExampleInput(null);
+                    var input3 = fixture.GetExampleInput();
                     input3.Description = fixture.GetInvalidDescriptionTooLong();
                     invalidInputsList.Add(new object[] {
                         input3,
