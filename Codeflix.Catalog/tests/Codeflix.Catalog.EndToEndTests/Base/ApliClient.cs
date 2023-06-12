@@ -1,8 +1,16 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
+﻿using Codeflix.Catalog.EndToEndTests.Extensions.String;
+using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
 using System.Text.Json;
 
 namespace Codeflix.Catalog.EndToEndTests.Base;
+
+
+class SnakeCaseNamingPolicy : JsonNamingPolicy
+{
+    public override string ConvertName(string name) => name.ToSnakeCase();
+}
+
 public class ApiClient
 {
     private readonly HttpClient _httpClient;
@@ -13,7 +21,7 @@ public class ApiClient
         _httpClient = httpClient;
         _defaultSerializeOptions = new JsonSerializerOptions
         {
-            //PropertyNamingPolicy = new JsonSnakeCasePolicy(),
+            PropertyNamingPolicy = new SnakeCaseNamingPolicy(),
             PropertyNameCaseInsensitive = true
         };
     }
