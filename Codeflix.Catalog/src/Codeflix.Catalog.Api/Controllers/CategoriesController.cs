@@ -1,4 +1,5 @@
 ﻿using Codeflix.Catalog.Api.ApiModels.Category;
+using Codeflix.Catalog.Api.ApiModels.Response;
 using Codeflix.Catalog.Application.UseCases.Category.Common;
 using Codeflix.Catalog.Application.UseCases.Category.CreateCategory;
 using Codeflix.Catalog.Application.UseCases.Category.DeleteCategory;
@@ -24,7 +25,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(CategoryModelOutput),StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse<CategoryModelOutput>),StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Create([FromBody] CreateCategoryInput input, CancellationToken cancellationToken)
@@ -33,17 +34,17 @@ public class CategoriesController : ControllerBase
         return CreatedAtAction(
             nameof(Create),
             new { output.Id },
-            output
+            new ApiResponse<CategoryModelOutput>(output)
         );
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(CategoryModelOutput), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<CategoryModelOutput>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById([FromRoute] Guid id,CancellationToken cancellationToken)
     {
         var output = await _mediator.Send(new GetCategoryInput(id), cancellationToken);
-        return Ok(output);
+        return Ok(new ApiResponse<CategoryModelOutput>(output));
     }
 
     [HttpDelete("{id:guid}")]
@@ -56,7 +57,7 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(CategoryModelOutput), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse<CategoryModelOutput>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Update(
@@ -66,7 +67,7 @@ public class CategoriesController : ControllerBase
     {
         var input = new UpdateCategoryInput(id, apiInput.Name, apiInput.Description, apiInput.IsActive);
         var output = await _mediator.Send(input, cancellationToken);
-        return Ok(output);
+        return Ok(new ApiResponse<CategoryModelOutput>(output));
     }
 
     [HttpGet]
@@ -88,6 +89,7 @@ public class CategoriesController : ControllerBase
         if (dir is not null) input.Dir = dir.Value;
 
         var output = await _mediator.Send(input, cancellationToken);
-        return Ok(output);
+        var response = new ApiResponseList<CategoryModelOutput>(output);
+        return Ok(response);
     }
 }

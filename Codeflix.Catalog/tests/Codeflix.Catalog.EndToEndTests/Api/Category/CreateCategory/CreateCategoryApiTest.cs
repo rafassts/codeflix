@@ -1,4 +1,5 @@
-﻿using Codeflix.Catalog.Application.UseCases.Category.Common;
+﻿using Codeflix.Catalog.Api.ApiModels.Response;
+using Codeflix.Catalog.Application.UseCases.Category.Common;
 using Codeflix.Catalog.Application.UseCases.Category.CreateCategory;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -22,21 +23,21 @@ public class CreateCategoryApiTest : IDisposable
         var input = _fixture.getExampleInput();
 
         var (response, output) = await _fixture.
-            ApiClient.Post<CategoryModelOutput>("/categories", input);
+            ApiClient.Post<ApiResponse<CategoryModelOutput>>("/categories", input);
 
         response.Should().NotBeNull();
         response!.StatusCode.Should().Be(HttpStatusCode.Created);
 
         output.Should().NotBeNull();
-        output!.Should().NotBeNull();
-        output!.Name.Should().Be(input.Name);
-        output.Description.Should().Be(input.Description);
-        output.IsActive.Should().Be(input.IsActive);
-        output.Id.Should().NotBeEmpty();
-        output.CreatedAt.Should().NotBeSameDateAs(default);
+        output!.Data.Should().NotBeNull();
+        output!.Data.Name.Should().Be(input.Name);
+        output.Data.Description.Should().Be(input.Description);
+        output.Data.IsActive.Should().Be(input.IsActive);
+        output.Data.Id.Should().NotBeEmpty();
+        output.Data.CreatedAt.Should().NotBeSameDateAs(default);
 
         //confirmar no banco
-        var dbCategory = await _fixture.Persistence.GetById(output.Id);
+        var dbCategory = await _fixture.Persistence.GetById(output.Data.Id);
 
         dbCategory.Should().NotBeNull();
         dbCategory!.Name.Should().Be(input.Name);
