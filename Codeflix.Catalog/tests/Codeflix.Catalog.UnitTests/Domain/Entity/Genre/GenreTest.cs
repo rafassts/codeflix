@@ -1,4 +1,7 @@
-﻿using FluentAssertions;
+﻿using Codeflix.Catalog.Domain.Exceptions;
+using Codeflix.Catalog.UnitTests.Domain.Entity.Category;
+using FluentAssertions;
+using System.ComponentModel.DataAnnotations;
 using DomainEntity = Codeflix.Catalog.Domain.Entity;
 
 namespace Codeflix.Catalog.UnitTests.Domain.Entity.Genre;
@@ -56,12 +59,10 @@ public class GenreTest
     [InlineData(false)]
     public void Activate(bool isActive)
     {
-        var name = _fixture.GetValidName();
-        var genre = new DomainEntity.Genre(name, isActive);
+        var genre = _fixture.GetExampleGenre(isActive);
 
         genre.Activate();
         genre.Should().NotBeNull();
-        genre.Name.Should().Be(name);
         genre.IsActive.Should().BeTrue();
         genre.CreatedAt.Should().NotBeSameDateAs(default);
 
@@ -78,9 +79,57 @@ public class GenreTest
 
         genre.Deactivate();
         genre.Should().NotBeNull();
-        genre.Name.Should().Be(name);
         genre.IsActive.Should().BeFalse();
         genre.CreatedAt.Should().NotBeSameDateAs(default);
+
+    }
+
+    [Fact(DisplayName = nameof(Update))]
+    [Trait("Domain", "Genre - Aggregates")]
+    public void Update()
+    {
+
+        var genre = _fixture.GetExampleGenre();
+        var newName = _fixture.GetValidName();
+        var oldIsActive = genre.IsActive;
+
+        genre.Update(newName);
+
+        genre.Should().NotBeNull();
+        genre.Name.Should().Be(newName);
+        genre.IsActive.Should().Be(oldIsActive);
+        genre.CreatedAt.Should().NotBeSameDateAs(default);
+    }
+
+    [Theory(DisplayName = nameof(InstantiateThhrowErrorWhenNameEmpty))]
+    [Trait("Domain", "Genre - Aggregates")]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData(null)]
+    public void InstantiateThhrowErrorWhenNameEmpty(string? name)
+    {
+        Action action = () => new DomainEntity.Genre(name!);
+
+        action.Should()
+            .Throw<EntityValidationException>()
+            .WithMessage("Name should not be null or empty");
+
+    }
+
+    [Theory(DisplayName = nameof(UpdateThrowWhenNameIsEmpty))]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData(null)]
+    public void UpdateThrowWhenNameIsEmpty(string? name)
+    {
+
+        var genre = _fixture.GetExampleGenre();
+     
+        var action = () => genre.Update(name!);
+
+        action.Should()
+            .Throw<EntityValidationException>()
+            .WithMessage("Name should not be null or empty");
 
     }
 }

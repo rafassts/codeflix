@@ -1,4 +1,5 @@
 ﻿using Codeflix.Catalog.Domain.SeedWork;
+using Codeflix.Catalog.Domain.Validation;
 
 namespace Codeflix.Catalog.Domain.Entity;
 public class Genre : AggregateRoot
@@ -8,6 +9,7 @@ public class Genre : AggregateRoot
         Name = name;
         IsActive = isActive;
         CreatedAt = DateTime.Now;
+        Validate();
     }
 
     public string Name { get; private set; }
@@ -15,9 +17,24 @@ public class Genre : AggregateRoot
     public DateTime CreatedAt { get; private set; }
 
     public void Activate()
-        => IsActive = true;
+    {
+        IsActive = true;
+        Validate();
+    }
 
     public void Deactivate()
-       => IsActive = false;
+    {
+        IsActive = false;
+        Validate();
+    }
 
+    public void Update(string name)
+    {
+        Name = name;
+        Validate();
+    }
+       
+    private void Validate()
+        => DomainValidation.NotNullOrEmpty(Name, nameof(Name));
+    
 }
