@@ -9,12 +9,16 @@ public class Genre : AggregateRoot
         Name = name;
         IsActive = isActive;
         CreatedAt = DateTime.Now;
+        _categories = new();
         Validate();
     }
 
     public string Name { get; private set; }
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
+    public IReadOnlyList<Guid> Categories => _categories.AsReadOnly();
+    
+    private List<Guid> _categories;
 
     public void Activate()
     {
@@ -34,7 +38,27 @@ public class Genre : AggregateRoot
         Validate();
     }
        
+    public void AddCategory(Guid categoryId)
+    {
+        _categories.Add(categoryId);
+        Validate();
+    }
+
+    public void RemoveCategory(Guid categoryId)
+    {
+        _categories.Remove(categoryId);
+        Validate();
+    }
+
+    public void RemoveAllCategories()
+    {
+        _categories.Clear();
+        Validate();
+    }
+
     private void Validate()
-        => DomainValidation.NotNullOrEmpty(Name, nameof(Name));
+    {
+        DomainValidation.NotNullOrEmpty(Name, nameof(Name));
+    }
     
 }

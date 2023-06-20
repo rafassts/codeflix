@@ -117,6 +117,7 @@ public class GenreTest
     }
 
     [Theory(DisplayName = nameof(UpdateThrowWhenNameIsEmpty))]
+    [Trait("Domain", "Genre - Aggregates")]
     [InlineData("")]
     [InlineData(" ")]
     [InlineData(null)]
@@ -130,6 +131,65 @@ public class GenreTest
         action.Should()
             .Throw<EntityValidationException>()
             .WithMessage("Name should not be null or empty");
+
+    }
+
+    [Fact(DisplayName = nameof(AddCategories))]
+    [Trait("Domain", "Genre - Aggregates")]
+    public void AddCategories()
+    {
+        var genre = _fixture.GetExampleGenre();
+        var categoryGuid = Guid.NewGuid();
+        var categoryGuid2 = Guid.NewGuid();
+
+        genre.AddCategory(categoryGuid);
+        genre.AddCategory(categoryGuid2);
+
+        genre.Categories.Should().HaveCount(2);
+        genre.Categories.Should().Contain(categoryGuid);
+        genre.Categories.Should().Contain(categoryGuid);
+    }
+
+    [Fact(DisplayName = nameof(RemoveCategories))]
+    [Trait("Domain", "Genre - Aggregates")]
+    public void RemoveCategories()
+    {
+        var categoryGuid = Guid.NewGuid();
+
+        var genre = _fixture.GetExampleGenre(
+            categoriesIdsList: new List<Guid>()
+            {
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                categoryGuid,
+                Guid.NewGuid()
+            });
+
+        genre.RemoveCategory(categoryGuid);
+
+        genre.Categories.Should().HaveCount(3);
+        genre.Categories.Should().NotContain(categoryGuid);
+
+    }
+
+    [Fact(DisplayName = nameof(RemoveAllCategories))]
+    [Trait("Domain", "Genre - Aggregates")]
+    public void RemoveAllCategories()
+    {
+        var categoryGuid = Guid.NewGuid();
+
+        var genre = _fixture.GetExampleGenre(
+            categoriesIdsList: new List<Guid>()
+            {
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                categoryGuid,
+                Guid.NewGuid()
+            });
+
+        genre.RemoveAllCategories();
+
+        genre.Categories.Should().HaveCount(0);
 
     }
 }
