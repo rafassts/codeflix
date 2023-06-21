@@ -27,7 +27,6 @@ public abstract class CategoryUseCasesBaseFixture : BaseFixture
 
         return description;
     }
-    public bool GetRandomIsActive() => new Random().NextDouble() < 0.5;
     public Mock<ICategoryRepository> GetRepositoryMock() => new();
     public Mock<IUnitOfWork> GetUnitOfWorkMock() => new();
     public DomainEntity.Category GetExampleCategory() => new(
