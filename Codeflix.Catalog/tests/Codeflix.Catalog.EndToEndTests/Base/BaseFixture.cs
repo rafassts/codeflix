@@ -29,15 +29,15 @@ public class BaseFixture
 
     public CodeflixCatalogDbContext CreateDbContext()
     {
-        //var context = new CodeflixCatalogDbContext(
-        //    new DbContextOptionsBuilder<CodeflixCatalogDbContext>()
-        //        .UseInMemoryDatabase("e2e-tests-db")
-        //        .Options);
-
         var context = new CodeflixCatalogDbContext(
-          new DbContextOptionsBuilder<CodeflixCatalogDbContext>()
-          .UseMySql(_dbConnectionString,ServerVersion.AutoDetect(_dbConnectionString))
-          .Options);
+            new DbContextOptionsBuilder<CodeflixCatalogDbContext>()
+                .UseInMemoryDatabase("e2e-tests-db")
+                .Options);
+
+        //var context = new CodeflixCatalogDbContext(
+        //  new DbContextOptionsBuilder<CodeflixCatalogDbContext>()
+        //  .UseMySql(_dbConnectionString,ServerVersion.AutoDetect(_dbConnectionString))
+        //  .Options);
 
         return context;
     }

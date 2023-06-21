@@ -1,4 +1,6 @@
 ﻿using Codeflix.Catalog.Application.Interfaces;
+using Codeflix.Catalog.Application.UseCases.Genre.CreateGenre;
+using Codeflix.Catalog.Domain.Repository;
 using Codeflix.Catalog.UnitTests.Application.Genre.Common;
 using Moq;
 
