@@ -13,8 +13,19 @@ public class CreateGenreTestFixture : GenreUseCaseBaseFixture
     public CreateGenreInput GetExampleInput()
         => new CreateGenreInput(GetValidGenreName(), GetRandomIsActive());
 
+    public CreateGenreInput GetExampleInputWithCategories()
+    {
+        var categoriesCount = (new Random().Next(1,10));
+        var categoriesIds = Enumerable.Range(1, categoriesCount)
+            .Select(_ => Guid.NewGuid())
+            .ToList();
+
+        return new CreateGenreInput(GetValidGenreName(), GetRandomIsActive(), categoriesIds);
+    }
+
     public Mock<IGenreRepository> GetGenreRepositoryMock() => new();
 
     public Mock<IUnitOfWork> GetUnitOfWorkMock() => new();
 
+    public Mock<ICategoryRepository> GetCategoryRepositoryMock() => new();
 }
