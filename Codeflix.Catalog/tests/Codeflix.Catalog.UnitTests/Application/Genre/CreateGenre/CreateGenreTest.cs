@@ -1,4 +1,6 @@
-﻿using FluentAssertions;
+﻿using Codeflix.Catalog.Application.Exceptions;
+using Codeflix.Catalog.Domain.Exceptions;
+using FluentAssertions;
 using Moq;
 using DomainEntity = Codeflix.Catalog.Domain.Entity;
 using UseCase = Codeflix.Catalog.Application.UseCases.Genre.CreateGenre;
@@ -59,13 +61,19 @@ public class CreateGenreTest
         var genreRepoMock = _fixture.GetGenreRepositoryMock();
         var categoryRepoMock = _fixture.GetCategoryRepositoryMock();
         var uowMock = _fixture.GetUnitOfWorkMock();
-       
+
         var useCase = new UseCase.CreateGenre(
             genreRepoMock.Object,
             uowMock.Object, 
             categoryRepoMock.Object);
 
         var input = _fixture.GetExampleInputWithCategories();
+
+        categoryRepoMock.Setup(
+         x => x.GetIdsListByIds(
+             It.IsAny<List<Guid>>(),
+             It.IsAny<CancellationToken>()))
+            .ReturnsAsync((IReadOnlyList<Guid>)input.CategoriesIds!);
 
         var output = await useCase.Handle(input, CancellationToken.None);
 
@@ -105,8 +113,7 @@ public class CreateGenreTest
                 It.IsAny<CancellationToken>()
             )
         ).ReturnsAsync(
-            (IReadOnlyList<Guid>) input.CategoriesIds.FindAll(x => x != exampeGuid)
-          ); //retorna todos menos o último
+            (IReadOnlyList<Guid>) input.CategoriesIds.FindAll(x => x != exampeGuid)); //retorna todos menos o último
 
         var uowMock = _fixture.GetUnitOfWorkMock();
         var useCase = new UseCase.CreateGenre(
@@ -117,7 +124,7 @@ public class CreateGenreTest
         var action = async() =>
             await useCase.Handle(input, CancellationToken.None);
 
-        await action.Should().ThrowAsync<Exception>()
+        await action.Should().ThrowAsync<RelatedAggregateException>()
             .WithMessage($"Related category id (or ids) not found: '{exampeGuid}'");
 
         categoryRepoMock.Verify(x =>
@@ -125,6 +132,31 @@ public class CreateGenreTest
                 It.IsAny<List<Guid>>(),
                 It.IsAny<CancellationToken>()),
                 Times.Once);
+
+    }
+
+    [Theory(DisplayName = nameof(ThrowWhenInvalidName))]
+    [Trait("Application", "CreateGenre Use Cases")]
+    [InlineData("")]
+    [InlineData(" ")]
+    [InlineData(null)]
+    public async Task ThrowWhenInvalidName(string name)
+    {
+        var genreRepoMock = _fixture.GetGenreRepositoryMock();
+        var categoryRepoMock = _fixture.GetCategoryRepositoryMock();
+        var input = _fixture.GetExampleInput(name);
+        var uowMock = _fixture.GetUnitOfWorkMock();
+     
+        var useCase = new UseCase.CreateGenre(
+            genreRepoMock.Object,
+            uowMock.Object,
+            categoryRepoMock.Object);
+
+        var action = async () =>
+            await useCase.Handle(input, CancellationToken.None);
+
+        await action.Should().ThrowAsync<EntityValidationException>()
+            .WithMessage("Name should not be null or empty");
 
     }
 
