@@ -155,12 +155,12 @@ public class UpdateGenreTest
 
     }
 
-
     [Fact(DisplayName = nameof(UpdatAddingRelatedCategories))]
     [Trait("Application", "CreateGenre Use Cases")]
     private async Task UpdatAddingRelatedCategories()
     {
         var genreRepoMock = _fixture.GetGenreRepositoryMock();
+        var categoryRepoMock = _fixture.GetCategoryRepositoryMock();
         var uowMock = _fixture.GetUnitOfWorkMock();
         var exampleGenre = _fixture.GetExampleGenre();
         var newNameExample = _fixture.GetValidGenreName();
@@ -173,10 +173,15 @@ public class UpdateGenreTest
             It.IsAny<CancellationToken>()
             )).ReturnsAsync(exampleGenre);
 
+        categoryRepoMock.Setup(x => x.GetIdsListByIds(
+            It.IsAny<List<Guid>>(),
+            It.IsAny<CancellationToken>()
+            )).ReturnsAsync(exampleCategoriesIdsList);
+
         var useCase = new UseCase.UpdateGenre(
             genreRepoMock.Object,
             uowMock.Object,
-            _fixture.GetCategoryRepositoryMock().Object);
+            categoryRepoMock.Object);
 
         var input = new UseCase.UpdateGenreInput(
             exampleGenre.Id, 
@@ -210,6 +215,7 @@ public class UpdateGenreTest
     private async Task UpdatReplacingRelatedCategories()
     {
         var genreRepoMock = _fixture.GetGenreRepositoryMock();
+        var categoryRepoMock = _fixture.GetCategoryRepositoryMock();    
         var uowMock = _fixture.GetUnitOfWorkMock();
         var exampleCategoriesIdsList = _fixture.GetRandomIdsList();
         var exampleGenre = _fixture.GetExampleGenre(categoriesIds: _fixture.GetRandomIdsList()); 
@@ -221,10 +227,15 @@ public class UpdateGenreTest
             It.IsAny<CancellationToken>()
             )).ReturnsAsync(exampleGenre);
 
+        categoryRepoMock.Setup(x => x.GetIdsListByIds(
+           It.IsAny<List<Guid>>(),
+           It.IsAny<CancellationToken>()
+           )).ReturnsAsync(exampleCategoriesIdsList);
+
         var useCase = new UseCase.UpdateGenre(
             genreRepoMock.Object,
             uowMock.Object,
-            _fixture.GetCategoryRepositoryMock().Object);
+            categoryRepoMock.Object);
 
         var input = new UseCase.UpdateGenreInput(
             exampleGenre.Id,
@@ -250,6 +261,57 @@ public class UpdateGenreTest
         output.CreatedAt.Should().Be(exampleGenre.CreatedAt);
         output.Categories.Should().HaveCount(exampleCategoriesIdsList.Count);
         exampleCategoriesIdsList.ForEach(x => output.Categories.Should().Contain(x));
+
+    }
+
+    [Fact(DisplayName = nameof(ThrowWhenCategoryNotFound))]
+    [Trait("Application", "CreateGenre Use Cases")]
+    private async Task ThrowWhenCategoryNotFound()
+    {
+        var genreRepoMock = _fixture.GetGenreRepositoryMock();
+        var categoryRepoMock = _fixture.GetCategoryRepositoryMock();
+        var uowMock = _fixture.GetUnitOfWorkMock();
+        var exampleNewCategoriesIdsList = _fixture.GetRandomIdsList(10);
+
+        //lista sem os dois últimos
+        var listReturnedByRepo = exampleNewCategoriesIdsList.GetRange(0, exampleNewCategoriesIdsList.Count - 2);
+        //dois últimos
+        var idsNotReturnedByRepo = exampleNewCategoriesIdsList.GetRange(exampleNewCategoriesIdsList.Count - 2, 2);
+
+        var exampleGenre = _fixture.GetExampleGenre(categoriesIds: _fixture.GetRandomIdsList());
+        var newNameExample = _fixture.GetValidGenreName();
+        var newIsActive = !exampleGenre.IsActive;
+
+        genreRepoMock.Setup(x => x.Get(
+            It.Is<Guid>(x => x == exampleGenre.Id),
+            It.IsAny<CancellationToken>()
+            )).ReturnsAsync(exampleGenre);
+
+        categoryRepoMock.Setup(x => x.GetIdsListByIds(
+              It.IsAny<List<Guid>>(),
+              It.IsAny<CancellationToken>()
+              )).ReturnsAsync(listReturnedByRepo);
+
+        var useCase = new UseCase.UpdateGenre(
+            genreRepoMock.Object,
+            uowMock.Object,
+            categoryRepoMock.Object);
+
+        var input = new UseCase.UpdateGenreInput(
+            exampleGenre.Id,
+            newNameExample,
+            newIsActive,
+            exampleNewCategoriesIdsList);
+
+        var action = async () =>
+            await useCase.Handle(input, CancellationToken.None);
+
+        var notFoundIdsAsString = String.Join(", ", idsNotReturnedByRepo);
+
+        await action.Should().ThrowAsync<RelatedAggregateException>()
+            .WithMessage($"Related category id (or ids) not found: '{notFoundIdsAsString}'");
+
+
 
     }
 }
