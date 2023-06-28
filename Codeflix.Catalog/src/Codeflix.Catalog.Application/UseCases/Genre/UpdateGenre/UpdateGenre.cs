@@ -21,26 +21,26 @@ public class UpdateGenre : IUpdateGenre
         _categoryRepository = categoryRepository;
     }
 
-    public async Task<GenreModelOutput> Handle(UpdateGenreInput request, CancellationToken cancellationToken)
+    public async Task<GenreModelOutput> Handle(UpdateGenreInput input, CancellationToken cancellationToken)
     {
-        var genre = await _genreRepository.Get(request.Id, cancellationToken);
+        var genre = await _genreRepository.Get(input.Id, cancellationToken);
 
-        genre.Update(request.Name);
-        if(request.IsActive is not null && request.IsActive != genre.IsActive)
+        genre.Update(input.Name);
+        if(input.IsActive is not null && input.IsActive != genre.IsActive)
         {
-            if((bool) request.IsActive)
+            if((bool) input.IsActive)
                 genre.Activate();
             else
                 genre.Deactivate();
         }
 
-        if(request.CategoriesIds is not null)
+        if(input.CategoriesIds is not null)
         {
             genre.RemoveAllCategories();
-            if (request.CategoriesIds.Count > 0)
+            if (input.CategoriesIds.Count > 0)
             {
-                await ValidateCategoriesIds(request, cancellationToken);
-                request.CategoriesIds!.ForEach(id => genre.AddCategory(id));
+                await ValidateCategoriesIds(input, cancellationToken);
+                input.CategoriesIds!.ForEach(id => genre.AddCategory(id));
             }
         }
 
@@ -50,14 +50,14 @@ public class UpdateGenre : IUpdateGenre
         return GenreModelOutput.FromGenre(genre);
     }
 
-    private async Task ValidateCategoriesIds(UpdateGenreInput request, CancellationToken cancellationToken)
+    private async Task ValidateCategoriesIds(UpdateGenreInput input, CancellationToken cancellationToken)
     {
         var idsInPersistence =
-        await _categoryRepository.GetIdsListByIds(request.CategoriesIds!, cancellationToken);
+        await _categoryRepository.GetIdsListByIds(input.CategoriesIds!, cancellationToken);
 
-        if (idsInPersistence.Count < request.CategoriesIds!.Count)
+        if (idsInPersistence.Count < input.CategoriesIds!.Count)
         {
-            var notFoundIds = request.CategoriesIds.FindAll(x => !idsInPersistence.Contains(x));
+            var notFoundIds = input.CategoriesIds.FindAll(x => !idsInPersistence.Contains(x));
             var notFoundIdsString = String.Join(", ", notFoundIds);
             throw new RelatedAggregateException($"Related category id (or ids) not found: '{notFoundIdsString}'");
         }

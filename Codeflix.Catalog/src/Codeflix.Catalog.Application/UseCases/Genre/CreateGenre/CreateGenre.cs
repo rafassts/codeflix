@@ -24,14 +24,14 @@ public class CreateGenre : ICreateGenre
         _categoryRepository = categoryRepository;
     }
 
-    public async Task<GenreModelOutput> Handle(CreateGenreInput request, CancellationToken cancellationToken)
+    public async Task<GenreModelOutput> Handle(CreateGenreInput input, CancellationToken cancellationToken)
     {
-        var genre = new DomainEntity.Genre(request.Name, request.IsActive);
+        var genre = new DomainEntity.Genre(input.Name, input.IsActive);
 
-        if ((request.CategoriesIds?.Count ?? 0) > 0)
+        if ((input.CategoriesIds?.Count ?? 0) > 0)
         {
-            await ValidateCategoriesIds(request, cancellationToken);
-            request.CategoriesIds?.ForEach(genre.AddCategory); //mesmo que (id => genre.AddCategory(id))
+            await ValidateCategoriesIds(input, cancellationToken);
+            input.CategoriesIds?.ForEach(genre.AddCategory); //mesmo que (id => genre.AddCategory(id))
         }
         
         await _genreRepository.Insert(genre, cancellationToken);
@@ -40,14 +40,14 @@ public class CreateGenre : ICreateGenre
         return GenreModelOutput.FromGenre(genre);
     }
 
-    private async Task ValidateCategoriesIds(CreateGenreInput request, CancellationToken cancellationToken)
+    private async Task ValidateCategoriesIds(CreateGenreInput input, CancellationToken cancellationToken)
     {
         var idsInPersistence =
-        await _categoryRepository.GetIdsListByIds(request.CategoriesIds!, cancellationToken);
+        await _categoryRepository.GetIdsListByIds(input.CategoriesIds!, cancellationToken);
 
-        if (idsInPersistence.Count < request.CategoriesIds!.Count)
+        if (idsInPersistence.Count < input.CategoriesIds!.Count)
         {
-            var notFoundIds = request.CategoriesIds.FindAll(x => !idsInPersistence.Contains(x));
+            var notFoundIds = input.CategoriesIds.FindAll(x => !idsInPersistence.Contains(x));
             var notFoundIdsString = String.Join(", ", notFoundIds);
             throw new RelatedAggregateException($"Related category id (or ids) not found: '{notFoundIdsString}'");
         }

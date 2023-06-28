@@ -14,9 +14,9 @@ public class GetGenreTest
     public GetGenreTest(GetGenreTestFixture getGenreTestFixture) 
         => _fixture = getGenreTestFixture;
 
-    [Fact(DisplayName = nameof(GetGenre))]
+    [Fact(DisplayName = nameof(Get))]
     [Trait("Application", "GetGenre Use Cases")]
-    private async Task GetGenre()
+    private async Task Get()
     {
         var genreRepoMock = _fixture.GetGenreRepositoryMock();
         var exampleGenre = _fixture.GetExampleGenre(categoriesIds: _fixture.GetRandomIdsList());
