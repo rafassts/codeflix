@@ -1,7 +1,6 @@
 ﻿using Codeflix.Catalog.Application.Exceptions;
 using Codeflix.Catalog.Domain.Entity;
 using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
-using Codeflix.Catalog.Infra.Data.EF;
 using FluentAssertions;
 using Repository = Codeflix.Catalog.Infra.Data.EF.Repositories;
 

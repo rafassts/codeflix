@@ -9,12 +9,6 @@ public class GenreUseCaseBaseFixture : BaseFixture
 {
     public string GetValidGenreName() => Faker.Commerce.Categories(1)[0];
 
-    public Mock<IGenreRepository> GetGenreRepositoryMock() => new();
-
-    public Mock<IUnitOfWork> GetUnitOfWorkMock() => new();
-
-    public Mock<ICategoryRepository> GetCategoryRepositoryMock() => new();
-
     public DomainEntity.Genre GetExampleGenre(bool? isActive = null, List<Guid>? categoriesIds = null)
     {
         var genre = new DomainEntity.Genre(GetValidGenreName(), isActive ?? GetRandomIsActive());
@@ -36,5 +30,10 @@ public class GenreUseCaseBaseFixture : BaseFixture
                 return genre;
 
             }).ToList();
+
+    public Mock<IGenreRepository> GetGenreRepositoryMock() => new();
+    public Mock<IUnitOfWork> GetUnitOfWorkMock() => new();
+
+    public Mock<ICategoryRepository> GetCategoryRepositoryMock() => new();
 
 }
