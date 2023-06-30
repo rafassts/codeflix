@@ -42,12 +42,12 @@ public class ListCategoriesApiTest : IDisposable
         output.Should().NotBeNull();
         output!.Data.Should().NotBeNull();
         output!.Meta.Should().NotBeNull();
-        output!.Meta.Total.Should().Be(exampleCategoriesList.Count);
+        output!.Meta!.Total.Should().Be(exampleCategoriesList.Count);
         output.Data.Should().HaveCount(defaultPerPage);
         output.Meta.CurrentPage.Should().Be(defaultPage);
         output.Meta.PerPage.Should().Be(defaultPerPage);
 
-        foreach (var outputItem in output.Data)
+        foreach (var outputItem in output.Data!)
         {
             var exampleItem = exampleCategoriesList.FirstOrDefault(x => x.Id == outputItem.Id);
             exampleItem.Should().NotBeNull();
@@ -72,7 +72,7 @@ public class ListCategoriesApiTest : IDisposable
         response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status200OK);
         output.Should().NotBeNull();
         output!.Should().NotBeNull();
-        output!.Meta.Total.Should().Be(0);
+        output!.Meta!.Total.Should().Be(0);
         output.Data.Should().HaveCount(0);
     }
 
@@ -93,12 +93,12 @@ public class ListCategoriesApiTest : IDisposable
         response!.StatusCode.Should().Be((HttpStatusCode)StatusCodes.Status200OK);
         output.Should().NotBeNull();
         output!.Should().NotBeNull();
-        output!.Meta.Total.Should().Be(exampleCategoriesList.Count);
+        output!.Meta!.Total.Should().Be(exampleCategoriesList.Count);
         output.Data.Should().HaveCount(input.PerPage);
         output.Meta.CurrentPage.Should().Be(input.Page);
         output.Meta.PerPage.Should().Be(input.PerPage);
 
-        foreach (var outputItem in output.Data)
+        foreach (var outputItem in output.Data!)
         {
             var exampleItem = exampleCategoriesList.FirstOrDefault(x => x.Id == outputItem.Id);
             exampleItem.Should().NotBeNull();
@@ -137,12 +137,12 @@ public class ListCategoriesApiTest : IDisposable
         output.Should().NotBeNull();
         output!.Meta.Should().NotBeNull();
         output!.Data.Should().NotBeNull();
-        output!.Meta.Total.Should().Be(exampleCategoriesList.Count);
+        output!.Meta!.Total.Should().Be(exampleCategoriesList.Count);
         output.Data.Should().HaveCount(expectedQuantityItems);
         output.Meta.CurrentPage.Should().Be(input.Page);
         output.Meta.PerPage.Should().Be(input.PerPage);
 
-        foreach (var outputItem in output.Data)
+        foreach (var outputItem in output.Data!)
         {
             var exampleItem = exampleCategoriesList.FirstOrDefault(x => x.Id == outputItem.Id);
             exampleItem.Should().NotBeNull();
@@ -198,12 +198,12 @@ public class ListCategoriesApiTest : IDisposable
         output.Should().NotBeNull();
         output!.Meta.Should().NotBeNull();
         output!.Data.Should().NotBeNull();
-        output!.Meta.Total.Should().Be(expectedQuantityTotalItems);
+        output!.Meta!.Total.Should().Be(expectedQuantityTotalItems);
         output.Data.Should().HaveCount(expectedQuantityItemsReturned);
         output.Meta.CurrentPage.Should().Be(input.Page);
         output.Meta.PerPage.Should().Be(input.PerPage);
 
-        foreach (var outputItem in output.Data)
+        foreach (var outputItem in output.Data!)
         {
             var exampleItem = exampleCategoriesList.FirstOrDefault(x => x.Id == outputItem.Id);
             exampleItem.Should().NotBeNull();
@@ -239,7 +239,7 @@ public class ListCategoriesApiTest : IDisposable
         output.Should().NotBeNull();
         output!.Meta.Should().NotBeNull();
         output!.Data.Should().NotBeNull();
-        output!.Meta.Total.Should().Be(exampleCategoriesList.Count);
+        output!.Meta!.Total.Should().Be(exampleCategoriesList.Count);
         output.Data.Should().HaveCount(exampleCategoriesList.Count);
         output.Meta.CurrentPage.Should().Be(input.Page);
         output.Meta.PerPage.Should().Be(input.PerPage);
@@ -300,7 +300,7 @@ public class ListCategoriesApiTest : IDisposable
         output.Should().NotBeNull();
         output!.Meta.Should().NotBeNull();
         output!.Data.Should().NotBeNull();
-        output!.Meta.Total.Should().Be(exampleCategoriesList.Count);
+        output!.Meta!.Total.Should().Be(exampleCategoriesList.Count);
         output.Data.Should().HaveCount(exampleCategoriesList.Count);
         output.Meta.CurrentPage.Should().Be(input.Page);
         output.Meta.PerPage.Should().Be(input.PerPage);
@@ -308,7 +308,7 @@ public class ListCategoriesApiTest : IDisposable
         //testa se está ordenado por data, pois pode ser igual até os segundos, então tem que ser maior ou igual 
         //para asc ou menor ou igual para desc
         DateTime? lastItemDate = null;
-        foreach (var outputItem in output.Data)
+        foreach (var outputItem in output.Data!)
         {
             var exampleItem = exampleCategoriesList.FirstOrDefault(x => x.Id == outputItem.Id);
             exampleItem.Should().NotBeNull();
@@ -332,6 +332,6 @@ public class ListCategoriesApiTest : IDisposable
         }
     }
 
-    public void Dispose()
+    public void  Dispose()
       => _fixture.CleanPersistence();
 }

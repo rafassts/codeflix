@@ -1,8 +1,10 @@
 ﻿using Codeflix.Catalog.Application.UseCases.Genre.Common;
 using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using Moq;
-using UseCase = Codeflix.Catalog.Application.UseCases.Genre.ListGenre;
+using UseCase = Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
 using DomainEntity = Codeflix.Catalog.Domain.Entity;
+using Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
+using FluentAssertions;
 
 namespace Codeflix.Catalog.UnitTests.Application.Genre.ListGenre;
 
@@ -33,11 +35,10 @@ public class ListGenreTest
             It.IsAny<CancellationToken>()
             )).ReturnsAsync(outputRepoSearch);
 
-        var useCase = new UseCase.ListGenre(genreRepoMock.Object);
+        var useCase = new UseCase.ListGenres(genreRepoMock.Object);
 
         ListGenresOutput output = await useCase.Handle(input, CancellationToken.None);
 
-        output.Should().NotBeNull();
         output.Page.Should().Be(outputRepoSearch.CurrentPage);
         output.PerPage.Should().Be(outputRepoSearch.PerPage);
         output.Total.Should().Be(outputRepoSearch.Total);
@@ -51,7 +52,7 @@ public class ListGenreTest
             outputItem.Name.Should().Be(repoGenre!.Name);
             outputItem.IsActive.Should().Be(repoGenre!.IsActive);
             outputItem.CreatedAt.Should().Be(repoGenre!.CreatedAt);
-            outputItem.Categories.Should().HaveCount(repoGenre.Categories.List);
+            outputItem.Categories.Should().HaveCount(repoGenre.Categories.Count);
 
             foreach (var item in repoGenre.Categories)
                 outputItem.Categories.Should().Contain(item);   

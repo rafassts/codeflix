@@ -1,4 +1,5 @@
 ﻿using Codeflix.Catalog.Application.UseCases.Category.ListCategories;
+using Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
 using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using Codeflix.Catalog.UnitTests.Application.Genre.Common;
 

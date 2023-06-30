@@ -19,7 +19,7 @@ public class CreateCategoryTestFixture : CategoryUseCasesBaseFixture
     public CreateCategoryInput GetInvalidInputShortName()
     {
         var invalidInputShortName = GetInput();
-        invalidInputShortName.Name = invalidInputShortName.Name.Substring(0, 2);
+        invalidInputShortName.Name = invalidInputShortName.Name[..2];
         return invalidInputShortName;
     }
 

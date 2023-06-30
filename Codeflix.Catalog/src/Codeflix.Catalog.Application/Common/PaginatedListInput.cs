@@ -22,4 +22,7 @@ public abstract class PaginatedListInput
         Sort=sort;
         Dir=dir;
     }
+
+    public SearchInput ToSearchInput()
+        => new SearchInput(Page,PerPage,Search,Sort,Dir);
 }
