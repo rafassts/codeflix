@@ -1,6 +1,4 @@
-﻿using Codeflix.Catalog.Application.UseCases.Genre.Common;
-using Codeflix.Catalog.Domain.Repository;
-using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
+﻿using Codeflix.Catalog.Domain.Repository;
 
 namespace Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
 public class ListGenres : IListGenres

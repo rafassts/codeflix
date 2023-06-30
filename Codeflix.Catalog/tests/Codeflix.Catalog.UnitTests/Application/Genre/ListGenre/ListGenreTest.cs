@@ -1,10 +1,8 @@
-﻿using Codeflix.Catalog.Application.UseCases.Genre.Common;
-using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
+﻿using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using Moq;
-using UseCase = Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
 using DomainEntity = Codeflix.Catalog.Domain.Entity;
-using Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
 using FluentAssertions;
+using Codeflix.Catalog.Application.UseCases.Genre.ListGenres;
 
 namespace Codeflix.Catalog.UnitTests.Application.Genre.ListGenre;
 
@@ -35,7 +33,7 @@ public class ListGenreTest
             It.IsAny<CancellationToken>()
             )).ReturnsAsync(outputRepoSearch);
 
-        var useCase = new UseCase.ListGenres(genreRepoMock.Object);
+        var useCase = new ListGenres(genreRepoMock.Object);
 
         ListGenresOutput output = await useCase.Handle(input, CancellationToken.None);
 
@@ -67,6 +65,83 @@ public class ListGenreTest
                  && searchInput.Search == input.Search
                  && searchInput.OrderBy == input.Sort
                  && searchInput.Order == input.Dir
+                 ),
+             It.IsAny<CancellationToken>()
+             ), Times.Once);
+
+    }
+
+    [Fact(DisplayName = nameof(ListEmpty))]
+    [Trait("Application", "GetGenre Use Cases")]
+    private async Task ListEmpty()
+    {
+        var genreRepoMock = _fixture.GetGenreRepositoryMock();
+
+        var input = _fixture.GetExampleInput();
+
+        var outputRepoSearch = new SearchOutput<DomainEntity.Genre>(
+              currentPage: input.Page,
+              perPage: input.PerPage,
+              items: new List<DomainEntity.Genre>(),
+              total: new Random().Next(50, 200));
+
+        genreRepoMock.Setup(x => x.Search(
+            It.IsAny<SearchInput>(),
+            It.IsAny<CancellationToken>()
+            )).ReturnsAsync(outputRepoSearch);
+
+        var useCase = new ListGenres(genreRepoMock.Object);
+
+        ListGenresOutput output = await useCase.Handle(input, CancellationToken.None);
+
+        output.Page.Should().Be(outputRepoSearch.CurrentPage);
+        output.PerPage.Should().Be(outputRepoSearch.PerPage);
+        output.Total.Should().Be(outputRepoSearch.Total);
+        output.Items.Should().HaveCount(outputRepoSearch.Items.Count);
+
+        genreRepoMock.Verify(x => x.Search(
+             It.Is<SearchInput>(
+                 searchInput =>
+                 searchInput.Page == input.Page
+                 && searchInput.PerPage == input.PerPage
+                 && searchInput.Search == input.Search
+                 && searchInput.OrderBy == input.Sort
+                 && searchInput.Order == input.Dir
+                 ),
+             It.IsAny<CancellationToken>()
+             ), Times.Once);
+
+    }
+
+    [Fact(DisplayName = nameof(ListUsingDefaultInputValues))]
+    [Trait("Application", "GetGenre Use Cases")]
+    private async Task ListUsingDefaultInputValues()
+    {
+        var genreRepoMock = _fixture.GetGenreRepositoryMock();
+
+        var outputRepoSearch = new SearchOutput<DomainEntity.Genre>(
+              currentPage: 1,
+              perPage: 15,
+              items: new List<DomainEntity.Genre>(),
+              total: 0);
+
+        genreRepoMock.Setup(x => x.Search(
+            It.IsAny<SearchInput>(),
+            It.IsAny<CancellationToken>()
+            )).ReturnsAsync(outputRepoSearch);
+
+        var useCase = new ListGenres(genreRepoMock.Object);
+
+        ListGenresOutput output = await useCase.Handle(new ListGenresInput(), CancellationToken.None);
+
+        genreRepoMock.Verify(x => x.Search(
+             It.Is<SearchInput>(
+                 searchInput =>
+                 searchInput.Page == 1
+                 && searchInput.PerPage == 15
+                 && searchInput.Search == ""
+                 && searchInput.OrderBy == ""
+                 && searchInput.Order == SearchOrder.Asc
                  ),
              It.IsAny<CancellationToken>()
              ), Times.Once);
