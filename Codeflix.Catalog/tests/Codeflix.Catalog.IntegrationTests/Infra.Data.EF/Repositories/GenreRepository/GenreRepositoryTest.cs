@@ -1,4 +1,7 @@
-﻿using FluentAssertions;
+﻿using Codeflix.Catalog.Application.Exceptions;
+using Codeflix.Catalog.Infra.Data.EF.Models;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Repository = Codeflix.Catalog.Infra.Data.EF.Repositories;
 
 namespace Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.GenreRepository;
@@ -33,7 +36,7 @@ public class GenreRepositoryTest
         var assertsDbContext = _fixture.CreateDbContext(true);
 
         var dbGenre = await (assertsDbContext)
-            .Categories
+            .Genres
             .FindAsync(exampleGenre.Id);
 
         dbGenre.Should().NotBeNull();
@@ -42,15 +45,135 @@ public class GenreRepositoryTest
         dbGenre?.CreatedAt.Should().Be(exampleGenre.CreatedAt);
 
         var genreCategoriesRelations = await assertsDbContext
-            .GenresCategories.Where(r => r.GenreId == exampleGenre.Id)
-            .ToList();
+            .GenresCategories
+            .Where(r => r.GenreId == exampleGenre.Id)
+            .ToListAsync();
 
         genreCategoriesRelations.Should().NotBeNull();
         genreCategoriesRelations.Should().HaveCount(categoriesListExample.Count);
+
+        //se as categorias que deveriam ser inseridas foram de fato
         genreCategoriesRelations.ForEach(relation =>
         {
             var expectedCategory = categoriesListExample.FirstOrDefault(x => x.Id == relation.CategoryId);
             expectedCategory.Should().NotBeNull();  
         });
+    }
+
+    [Fact(DisplayName = nameof(Get))]
+    [Trait("Integration/Infra.Data", "GenreRepository - Repositories")]
+    public async Task Get()
+    {
+        var dbContext = _fixture.CreateDbContext();
+        var exampleGenre = _fixture.GetExampleGenre();
+        var categoriesListExample = _fixture.GetExampleCategoriesList(3);
+
+        categoriesListExample.ForEach(category => exampleGenre.AddCategory(category.Id));
+        await dbContext.Categories.AddRangeAsync(categoriesListExample);
+        await dbContext.Genres.AddAsync(exampleGenre);
+
+        foreach (var categoryId in exampleGenre.Categories)
+        {
+            var relation = new GenresCategories(categoryId, exampleGenre.Id);
+            await dbContext.GenresCategories.AddAsync(relation);
+        }
+        
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+
+        //criamos outra instância do context para garantir que não estava em cache
+        var genreRepository = new Repository.GenreRepository(_fixture.CreateDbContext(true));
+
+        var genreFromRepo = await genreRepository.Get(exampleGenre.Id, CancellationToken.None);
+
+        genreFromRepo.Should().NotBeNull();
+        genreFromRepo!.Name.Should().Be(exampleGenre.Name);
+        genreFromRepo.IsActive.Should().Be(exampleGenre.IsActive);
+        genreFromRepo.CreatedAt.Should().Be(exampleGenre.CreatedAt);
+
+        genreFromRepo.Categories.Should().NotBeNull();
+        genreFromRepo.Categories.Should().HaveCount(categoriesListExample.Count);
+
+        //se as categorias que deveriam ser inseridas foram de fato
+        foreach (var categoryId in genreFromRepo.Categories)
+        {
+            var expectedCategory = categoriesListExample.FirstOrDefault(x => x.Id == categoryId);
+            expectedCategory.Should().NotBeNull();
+        }
+    }
+
+    [Fact(DisplayName = nameof(GetThrowWhenNotFound))]
+    [Trait("Integration/Infra.Data", "GenreRepository - Repositories")]
+    public async Task GetThrowWhenNotFound()
+    {
+        var exampleNotFoundGuid = Guid.NewGuid();
+        var dbContext = _fixture.CreateDbContext();
+        var exampleGenre = _fixture.GetExampleGenre();
+        var categoriesListExample = _fixture.GetExampleCategoriesList(3);
+
+        categoriesListExample.ForEach(category => exampleGenre.AddCategory(category.Id));
+        await dbContext.Categories.AddRangeAsync(categoriesListExample);
+        await dbContext.Genres.AddAsync(exampleGenre);
+
+        foreach (var categoryId in exampleGenre.Categories)
+        {
+            var relation = new GenresCategories(categoryId, exampleGenre.Id);
+            await dbContext.GenresCategories.AddAsync(relation);
+        }
+
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+
+        //criamos outra instância do context para garantir que não estava em cache
+        var genreRepository = new Repository.GenreRepository(_fixture.CreateDbContext(true));
+
+        var action = async () => await genreRepository.Get(exampleNotFoundGuid, CancellationToken.None);
+
+        await action.Should().ThrowAsync<NotFoundException>()
+            .WithMessage($"Genre '{exampleNotFoundGuid}' not found");
+    
+    }
+
+    [Fact(DisplayName = nameof(Delete))]
+    [Trait("Integration/Infra.Data", "GenreRepository - Repositories")]
+    public async Task Delete()
+    {
+        var dbContext = _fixture.CreateDbContext();
+        var exampleGenre = _fixture.GetExampleGenre();
+        var categoriesListExample = _fixture.GetExampleCategoriesList(3);
+
+        categoriesListExample.ForEach(category => exampleGenre.AddCategory(category.Id));
+        await dbContext.Categories.AddRangeAsync(categoriesListExample);
+        await dbContext.Genres.AddAsync(exampleGenre);
+
+        foreach (var categoryId in exampleGenre.Categories)
+        {
+            var relation = new GenresCategories(categoryId, exampleGenre.Id);
+            await dbContext.GenresCategories.AddAsync(relation);
+        }
+
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+
+        //criamos outra instância do context para garantir que não estava em cache
+        var genreRepository = new Repository.GenreRepository(_fixture.CreateDbContext(true));
+
+        await genreRepository.Delete(exampleGenre, CancellationToken.None);
+
+        var assertDbContext = _fixture.CreateDbContext(true);
+
+        var dbGenre = await assertDbContext
+            .Genres
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == exampleGenre.Id);
+
+        dbGenre.Should().BeNull();
+
+        var categoriesIdsList = await assertDbContext
+            .GenresCategories
+            .AsNoTracking()
+            .Where(x => x.GenreId == exampleGenre.Id)
+            .Select(x => x.CategoryId)
+            .ToListAsync();
+
+        categoriesIdsList.Should().HaveCount(0);
+        
     }
 }
