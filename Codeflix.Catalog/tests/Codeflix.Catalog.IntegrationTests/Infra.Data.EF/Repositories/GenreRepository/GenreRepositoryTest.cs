@@ -153,9 +153,13 @@ public class GenreRepositoryTest
         await dbContext.SaveChangesAsync(CancellationToken.None);
 
         //criamos outra instância do context para garantir que não estava em cache
-        var genreRepository = new Repository.GenreRepository(_fixture.CreateDbContext(true));
+        var repoDbContext = _fixture.CreateDbContext(true);
+        var genreRepository = new Repository.GenreRepository(repoDbContext);
 
         await genreRepository.Delete(exampleGenre, CancellationToken.None);
+
+        //não dá o save changes dentro do repo porque vai ser tarefa do uow na aplicação
+        await repoDbContext.SaveChangesAsync();
 
         var assertDbContext = _fixture.CreateDbContext(true);
 

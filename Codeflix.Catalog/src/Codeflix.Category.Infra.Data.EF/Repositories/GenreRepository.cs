@@ -18,7 +18,11 @@ public class GenreRepository : IGenreRepository
 
     public Task Delete(Genre genre, CancellationToken cancellationToken)
     {
-        
+        _genresCategories.RemoveRange(_genresCategories.Where(x => x.GenreId == genre.Id));
+
+        _genres.Remove(genre);
+
+        return Task.CompletedTask;
     }
 
     public async Task<Genre> Get(Guid id, CancellationToken cancellationToken)
