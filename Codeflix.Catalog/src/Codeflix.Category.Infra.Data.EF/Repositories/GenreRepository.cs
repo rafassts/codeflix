@@ -55,14 +55,41 @@ public class GenreRepository : IGenreRepository
         }
     }
 
-    public Task<SearchOutput<Genre>> Search(SearchInput input, CancellationToken cancellationToken)
+    public async Task<SearchOutput<Genre>> Search(SearchInput input, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        var genres = await _genres.ToListAsync();
+
+        return new SearchOutput<Genre>(input.Page, input.PerPage, genres.Count, genres);
     }
 
-    public Task Update(Genre genre, CancellationToken cancellationToken)
+    public async Task Update(Genre genre, CancellationToken cancellationToken)
     {
         _genres.Update(genre);
-        return Task.CompletedTask;  
+        _genresCategories.RemoveRange(_genresCategories.Where(x => x.GenreId == genre.Id));
+        
+        if(genre.Categories.Count > 0)
+        {
+            var relations = genre
+                .Categories
+                .Select(categoryId => new GenresCategories(categoryId, genre.Id));
+
+            await _genresCategories.AddRangeAsync(relations);
+        }
+    }
+
+    private IQueryable<Category> AddOrderToQuery(IQueryable<Category> query, string orderProperty, SearchOrder order)
+    {
+        var orderedQuery = (orderProperty.ToLower(), order) switch
+        {
+            ("name", SearchOrder.Asc) => query.OrderBy(x => x.Name).ThenBy(x => x.Id),
+            ("name", SearchOrder.Desc) => query.OrderByDescending(x => x.Name).ThenByDescending(x => x.Id),
+            ("id", SearchOrder.Asc) => query.OrderBy(x => x.Id),
+            ("id", SearchOrder.Desc) => query.OrderByDescending(x => x.Id),
+            ("createdat", SearchOrder.Asc) => query.OrderBy(x => x.CreatedAt),
+            ("createdat", SearchOrder.Desc) => query.OrderByDescending(x => x.CreatedAt),
+            _ => query.OrderBy(x => x.Name).ThenBy(x => x.Id)
+        };
+
+        return orderedQuery.ThenBy(x => x.CreatedAt);
     }
 }

@@ -59,6 +59,11 @@ public class CategoryRepository : ICategoryRepository
         return Task.FromResult(_categories.Update(aggregate));
     }
 
+    public Task<IReadOnlyList<Guid>> GetIdsListByIds(List<Guid> ids, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
     private IQueryable<Category> AddOrderToQuery(IQueryable<Category> query, string orderProperty, SearchOrder order)
     {
         var orderedQuery = (orderProperty.ToLower(), order) switch
@@ -72,11 +77,6 @@ public class CategoryRepository : ICategoryRepository
             _ => query.OrderBy(x => x.Name).ThenBy(x => x.Id)
         };
 
-        return orderedQuery.ThenBy(x => x.CreatedAt);    
-    }
-
-    public Task<IReadOnlyList<Guid>> GetIdsListByIds(List<Guid> ids, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
+        return orderedQuery.ThenBy(x => x.CreatedAt);
     }
 }
