@@ -62,6 +62,7 @@ public class GenreRepository : IGenreRepository
 
     public Task Update(Genre genre, CancellationToken cancellationToken)
     {
-        throw new NotImplementedException();
+        _genres.Update(genre);
+        return Task.CompletedTask;  
     }
 }

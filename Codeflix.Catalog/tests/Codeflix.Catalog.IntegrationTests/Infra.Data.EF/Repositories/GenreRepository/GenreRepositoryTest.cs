@@ -33,6 +33,7 @@ public class GenreRepositoryTest
 
         //feito isso por conta do tracking do ef core - cria outro contexto
 
+
         var assertsDbContext = _fixture.CreateDbContext(true);
 
         var dbGenre = await (assertsDbContext)
@@ -51,6 +52,7 @@ public class GenreRepositoryTest
 
         genreCategoriesRelations.Should().NotBeNull();
         genreCategoriesRelations.Should().HaveCount(categoriesListExample.Count);
+        
 
         //se as categorias que deveriam ser inseridas foram de fato
         genreCategoriesRelations.ForEach(relation =>
@@ -179,5 +181,70 @@ public class GenreRepositoryTest
 
         categoriesIdsList.Should().HaveCount(0);
         
+    }
+
+    [Fact(DisplayName = nameof(Update))]
+    [Trait("Integration/Infra.Data", "GenreRepository - Repositories")]
+    public async Task Update()
+    {
+        var dbContext = _fixture.CreateDbContext();
+        var exampleGenre = _fixture.GetExampleGenre();
+        var categoriesListExample = _fixture.GetExampleCategoriesList(3);
+
+        categoriesListExample.ForEach(category => exampleGenre.AddCategory(category.Id));
+        await dbContext.Categories.AddRangeAsync(categoriesListExample);
+        await dbContext.Genres.AddAsync(exampleGenre);
+
+        foreach (var categoryId in exampleGenre.Categories)
+        {
+            var relation = new GenresCategories(categoryId, exampleGenre.Id);
+            await dbContext.GenresCategories.AddAsync(relation);
+        }
+
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+
+        //criamos outra instância do context para garantir que não estava em cache
+
+        var actDbContext = _fixture.CreateDbContext(true);
+
+        var genreRepository = new Repository.GenreRepository(actDbContext);
+
+        exampleGenre.Update(_fixture.GetValidGenreName());
+        
+        if (exampleGenre.IsActive)
+            exampleGenre.Deactivate();
+        else
+            exampleGenre.Activate();
+
+
+        await genreRepository.Update(exampleGenre, CancellationToken.None);
+
+        await actDbContext.SaveChangesAsync(CancellationToken.None);
+
+        var assertsDbContext = _fixture.CreateDbContext(true);
+
+        var genreFromDb = await (assertsDbContext)
+            .Genres
+            .FindAsync(exampleGenre.Id);
+
+        genreFromDb.Should().NotBeNull();
+        genreFromDb!.Name.Should().Be(exampleGenre.Name);
+        genreFromDb.IsActive.Should().Be(exampleGenre.IsActive);
+        genreFromDb.CreatedAt.Should().Be(exampleGenre.CreatedAt);
+
+        var genreCategoriesRelations = await assertsDbContext
+            .GenresCategories
+            .Where(r => r.GenreId == exampleGenre.Id)
+            .ToListAsync();
+
+        genreCategoriesRelations.Should().NotBeNull();
+        genreCategoriesRelations.Should().HaveCount(categoriesListExample.Count);
+
+        //se as categorias que deveriam ser inseridas foram de fato
+        genreCategoriesRelations.ForEach(relation =>
+        {
+            var expectedCategory = categoriesListExample.FirstOrDefault(x => x.Id == relation.CategoryId);
+            expectedCategory.Should().NotBeNull();
+        });
     }
 }
