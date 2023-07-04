@@ -381,9 +381,9 @@ public class GenreRepositoryTest
 
     }
 
-    [Fact(DisplayName = nameof(ListReturnsItemsAndTotal))]
+    [Fact(DisplayName = nameof(SearchReturnsItemsAndTotal))]
     [Trait("Integration/Infra.Data", "GenreRepository - Repositories")]
-    public async Task ListReturnsItemsAndTotal()
+    public async Task SearchReturnsItemsAndTotal()
     {
         var dbContext = _fixture.CreateDbContext();
         var exampleGenresList = _fixture.GetExampleGenresList();
@@ -420,4 +420,71 @@ public class GenreRepositoryTest
 
     }
 
+    [Fact(DisplayName = nameof(SearchReturnsRelations))]
+    [Trait("Integration/Infra.Data", "GenreRepository - Repositories")]
+    public async Task SearchReturnsRelations()
+    {
+        var dbContext = _fixture.CreateDbContext();
+        var exampleGenresList = _fixture.GetExampleGenresList();
+
+        await dbContext.Genres.AddRangeAsync(exampleGenresList);
+
+        var random = new Random();
+       
+        //percorre a lista de gêneros
+        exampleGenresList.ForEach(genre =>
+        {
+            //cria uma lista de categorias para relacionar
+            var categoriesListToRelate = _fixture.GetExampleCategoriesList(random.Next(0,4));
+
+            if(categoriesListToRelate.Count > 0)
+            {
+                //adiciona as categorias em cada gênero
+                categoriesListToRelate.ForEach(category => genre.AddCategory(category.Id));
+
+                //salva as categorias no banco
+                dbContext.Categories.AddRange(categoriesListToRelate);
+
+                //cria o relacionamento do gênero com a lista de categorias geradas
+                var relationsToAdd = categoriesListToRelate
+                    .Select(category => new GenresCategories(category.Id, genre.Id))
+                    .ToList();
+
+                //salva o relacionamento no banco
+                dbContext.GenresCategories.AddRange(relationsToAdd);
+            }
+        });
+
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+
+        //criamos outra instância do context para garantir que não estava em cache
+
+        var actDbContext = _fixture.CreateDbContext(true);
+
+        var genreRepository = new Repository.GenreRepository(actDbContext);
+
+        var searchInput = new SearchInput(1, 20, "", "", SearchOrder.Asc);
+
+        var searchResult = await genreRepository.Search(searchInput, CancellationToken.None);
+
+        searchResult.Should().NotBeNull();
+        searchResult.CurrentPage.Should().Be(searchInput.Page);
+        searchResult.PerPage.Should().Be(searchInput.PerPage);
+        searchResult.Total.Should().Be(exampleGenresList.Count);
+
+        searchResult.Items.Should().HaveCount(exampleGenresList.Count);
+
+        foreach (var item in searchResult.Items)
+        {
+            var exampleGenre = exampleGenresList.Find(x => x.Id == item.Id);
+            exampleGenre.Should().NotBeNull();
+            item.Name.Should().Be(exampleGenre!.Name);
+            item.CreatedAt.Should().Be(exampleGenre!.CreatedAt);
+            item.IsActive.Should().Be(exampleGenre!.IsActive);
+            item.Categories.Should().HaveCount(exampleGenre.Categories.Count);
+            item.Categories.Should().BeEquivalentTo(exampleGenre.Categories);
+
+        }
+
+    }
 }

@@ -58,6 +58,28 @@ public class GenreRepository : IGenreRepository
     public async Task<SearchOutput<Genre>> Search(SearchInput input, CancellationToken cancellationToken)
     {
         var genres = await _genres.ToListAsync();
+        var genresIds = genres.Select(x => x.Id).ToList();
+
+        //todos os relacionamentos da lista de gêneros
+        var relations = await _genresCategories
+            .Where(relation => genresIds.Contains(relation.GenreId))
+            .ToListAsync();
+
+        //agrupa os generos iguais - G1 C1 G1 C2
+        var relationsByGenreIdGroup = relations.GroupBy(x => x.GenreId).ToList();
+
+        //percorre o agrupamento
+        relationsByGenreIdGroup.ForEach(relationGroup =>
+        {
+            //encontra cada gênero da lista (a chave do agrupamento é o genreId)
+            var genre = genres.Find(genre => genre.Id == relationGroup.Key);
+
+            if (genre is null)
+                return;
+
+            //adiciona no gênero encontrato as categorias que estão no relacionamento
+            relationGroup.ToList().ForEach(relation => genre.AddCategory(relation.CategoryId));
+        });
 
         return new SearchOutput<Genre>(input.Page, input.PerPage, genres.Count, genres);
     }
