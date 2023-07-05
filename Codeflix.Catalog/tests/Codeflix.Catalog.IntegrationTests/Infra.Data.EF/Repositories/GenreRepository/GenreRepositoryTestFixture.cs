@@ -25,6 +25,14 @@ public class GenreRepositoryTestFixture : BaseFixture
             .Range(1, count)
             .Select(_ => GetExampleGenre()).ToList();
 
+    public List<Genre> GetExampleGenresListWithNames(List<string> names)
+       => names.Select(name =>
+       {
+           var genre = GetExampleGenre();
+           genre.Update(name);
+           return genre;
+       }).ToList();
+
     //categories
     public string GetValidCategoryName()
     {

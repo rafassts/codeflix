@@ -10,7 +10,7 @@ public class GenreRepository : IGenreRepository
 {
     private readonly CodeflixCatalogDbContext _context;
 
-    public GenreRepository(CodeflixCatalogDbContext context) => _context=context;
+    public GenreRepository(CodeflixCatalogDbContext context) => _context = context;
 
     private DbSet<Genre> _genres => _context.Set<Genre>();
 
@@ -35,7 +35,7 @@ public class GenreRepository : IGenreRepository
 
         var categoryIds = await _genresCategories
             .AsNoTracking()
-            .Where(x => x.GenreId ==  id)
+            .Where(x => x.GenreId == id)
             .Select(x => x.CategoryId)
             .ToListAsync(cancellationToken);
 
@@ -48,16 +48,39 @@ public class GenreRepository : IGenreRepository
     {
         await _genres.AddAsync(genre);
 
-        if(genre.Categories.Count > 0)
+        if (genre.Categories.Count > 0)
         {
             var relations = genre.Categories.Select(catId => new GenresCategories(catId, genre.Id));
             await _genresCategories.AddRangeAsync(relations);
         }
     }
 
+    public async Task Update(Genre genre, CancellationToken cancellationToken)
+    {
+        _genres.Update(genre);
+        _genresCategories.RemoveRange(_genresCategories.Where(x => x.GenreId == genre.Id));
+
+        if (genre.Categories.Count > 0)
+        {
+            var relations = genre
+                .Categories
+                .Select(categoryId => new GenresCategories(categoryId, genre.Id));
+
+            await _genresCategories.AddRangeAsync(relations);
+        }
+    }
+
     public async Task<SearchOutput<Genre>> Search(SearchInput input, CancellationToken cancellationToken)
     {
-        var genres = await _genres.ToListAsync();
+        var toSkip = (input.Page - 1) * input.PerPage;
+
+        var genres = await _genres
+            .Skip(toSkip)
+            .Take(input.PerPage)
+            .ToListAsync();
+
+        var total = await _genres.CountAsync();
+
         var genresIds = genres.Select(x => x.Id).ToList();
 
         //todos os relacionamentos da lista de gêneros
@@ -65,7 +88,16 @@ public class GenreRepository : IGenreRepository
             .Where(relation => genresIds.Contains(relation.GenreId))
             .ToListAsync();
 
-        //agrupa os generos iguais - G1 C1 G1 C2
+        /*
+         * agrupa os generos iguais 
+         * G1 C1 
+         * G1 C2 
+         * G2 C1 
+         * G2 C2  
+         * fica: 
+         * KEY G1 [C1,C2]
+         * KEY G2 [C1,C2]
+         */
         var relationsByGenreIdGroup = relations.GroupBy(x => x.GenreId).ToList();
 
         //percorre o agrupamento
@@ -77,41 +109,11 @@ public class GenreRepository : IGenreRepository
             if (genre is null)
                 return;
 
-            //adiciona no gênero encontrato as categorias que estão no relacionamento
+            //adiciona no gênero encontrato as categorias que estão no relacionamento dele
             relationGroup.ToList().ForEach(relation => genre.AddCategory(relation.CategoryId));
         });
 
-        return new SearchOutput<Genre>(input.Page, input.PerPage, genres.Count, genres);
+        return new SearchOutput<Genre>(input.Page, input.PerPage, total, genres);
     }
 
-    public async Task Update(Genre genre, CancellationToken cancellationToken)
-    {
-        _genres.Update(genre);
-        _genresCategories.RemoveRange(_genresCategories.Where(x => x.GenreId == genre.Id));
-        
-        if(genre.Categories.Count > 0)
-        {
-            var relations = genre
-                .Categories
-                .Select(categoryId => new GenresCategories(categoryId, genre.Id));
-
-            await _genresCategories.AddRangeAsync(relations);
-        }
-    }
-
-    private IQueryable<Category> AddOrderToQuery(IQueryable<Category> query, string orderProperty, SearchOrder order)
-    {
-        var orderedQuery = (orderProperty.ToLower(), order) switch
-        {
-            ("name", SearchOrder.Asc) => query.OrderBy(x => x.Name).ThenBy(x => x.Id),
-            ("name", SearchOrder.Desc) => query.OrderByDescending(x => x.Name).ThenByDescending(x => x.Id),
-            ("id", SearchOrder.Asc) => query.OrderBy(x => x.Id),
-            ("id", SearchOrder.Desc) => query.OrderByDescending(x => x.Id),
-            ("createdat", SearchOrder.Asc) => query.OrderBy(x => x.CreatedAt),
-            ("createdat", SearchOrder.Desc) => query.OrderByDescending(x => x.CreatedAt),
-            _ => query.OrderBy(x => x.Name).ThenBy(x => x.Id)
-        };
-
-        return orderedQuery.ThenBy(x => x.CreatedAt);
-    }
 }
