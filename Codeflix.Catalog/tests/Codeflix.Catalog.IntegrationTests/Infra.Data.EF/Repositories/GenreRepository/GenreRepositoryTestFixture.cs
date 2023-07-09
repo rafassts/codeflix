@@ -1,4 +1,5 @@
 ﻿using Codeflix.Catalog.Domain.Entity;
+using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using Codeflix.Catalog.IntegrationTests.Base;
 using DomainEntity = Codeflix.Catalog.Domain.Entity;
 
@@ -32,6 +33,26 @@ public class GenreRepositoryTestFixture : BaseFixture
            genre.Update(name);
            return genre;
        }).ToList();
+
+    public List<Genre> CloneGenresListOrdered(List<Genre> genres,string orderBy,SearchOrder order)
+    {
+        var listClone = new List<Genre>(genres);
+
+        //nova sintaxe do switch
+        var orderedEnumerable = (orderBy, order) switch
+        {
+            ("name", SearchOrder.Asc) => listClone.OrderBy(x => x.Name).ThenBy(x => x.Id),
+            ("name", SearchOrder.Desc) => listClone.OrderByDescending(x => x.Name).ThenByDescending(x => x.Id),
+            ("id", SearchOrder.Asc) => listClone.OrderBy(x => x.Id),
+            ("id", SearchOrder.Desc) => listClone.OrderByDescending(x => x.Id),
+            ("createdAt", SearchOrder.Asc) => listClone.OrderBy(x => x.CreatedAt),
+            ("createdAt", SearchOrder.Desc) => listClone.OrderByDescending(x => x.CreatedAt),
+            _ => listClone.OrderBy(x => x.Name).ThenBy(x => x.Id) //default
+        };
+
+        return orderedEnumerable.ToList();
+
+    }
 
     //categories
     public string GetValidCategoryName()

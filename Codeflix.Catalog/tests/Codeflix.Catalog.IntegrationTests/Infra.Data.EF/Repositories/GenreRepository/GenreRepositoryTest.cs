@@ -503,8 +503,6 @@ public class GenreRepositoryTest
         searchResult.PerPage.Should().Be(searchInput.PerPage);
         searchResult.Total.Should().Be(0);
         searchResult.Items.Should().HaveCount(0);
-
-
     }
 
     [Theory(DisplayName = nameof(SearchReturnsPaginated))]
@@ -673,5 +671,54 @@ public class GenreRepositoryTest
 
         }
 
+    }
+
+    [Theory(DisplayName = nameof(SearchOrdered))]
+    [Trait("Integration/Infra.Data", "CategoryRepository - Repositories")]
+    [InlineData("name", "asc")]
+    [InlineData("name", "desc")]
+    [InlineData("id", "asc")]
+    [InlineData("id", "desc")]
+    [InlineData("createdAt", "asc")]
+    [InlineData("createdAt", "desc")]
+    [InlineData("", "asc")]
+    public async Task SearchOrdered(
+       string orderBy,
+       string order)
+    {
+        var dbContext = _fixture.CreateDbContext();
+        var exampleGenresList = _fixture.GetExampleGenresList(10);
+        await dbContext.AddRangeAsync(exampleGenresList);
+        await dbContext.SaveChangesAsync(CancellationToken.None);
+
+        var repo = new Repository.GenreRepository(dbContext);
+        var searchOrder = order.ToLower() == "asc" ? SearchOrder.Asc : SearchOrder.Desc;
+        var searchInput = new SearchInput(1, 20, "", orderBy, searchOrder);
+
+        var output = await repo.Search(searchInput, CancellationToken.None);
+
+        var expectedOrderedList = _fixture.CloneGenresListOrdered(
+            exampleGenresList, orderBy, searchOrder);
+
+        //não vamos verificar paginação
+        output.Should().NotBeNull();
+        output.Items.Should().NotBeNull().And.HaveCount(exampleGenresList.Count);
+        output.CurrentPage.Should().Be(searchInput.Page);
+        output.PerPage.Should().Be(searchInput.PerPage);
+        output.Total.Should().Be(exampleGenresList.Count);
+
+        for (int indice = 0; indice < expectedOrderedList.Count; indice++)
+        {
+            var expectedItem = expectedOrderedList[indice];
+            var outputItem = output.Items[indice];
+
+            expectedItem.Should().NotBeNull();
+            outputItem.Should().NotBeNull();
+
+            outputItem.Id.Should().Be(expectedItem.Id);
+            outputItem.Name.Should().Be(expectedItem!.Name);
+            outputItem.IsActive.Should().Be(expectedItem.IsActive);
+            outputItem.CreatedAt.Should().Be(expectedItem.CreatedAt);
+        }
     }
 }

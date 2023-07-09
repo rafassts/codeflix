@@ -74,12 +74,19 @@ public class GenreRepository : IGenreRepository
     {
         var toSkip = (input.Page - 1) * input.PerPage;
 
-        var genres = await _genres
+        var query = _genres.AsNoTracking();
+
+        query = AddOrderToQuery(query, input.OrderBy, input.Order);
+
+        if (!String.IsNullOrWhiteSpace(input.Search))
+            query = query.Where(genre => genre.Name.Contains(input.Search));
+
+        var genres = await query
             .Skip(toSkip)
             .Take(input.PerPage)
             .ToListAsync();
 
-        var total = await _genres.CountAsync();
+        var total = await query.CountAsync();
 
         var genresIds = genres.Select(x => x.Id).ToList();
 
@@ -114,6 +121,22 @@ public class GenreRepository : IGenreRepository
         });
 
         return new SearchOutput<Genre>(input.Page, input.PerPage, total, genres);
+    }
+
+    private IQueryable<Genre> AddOrderToQuery(IQueryable<Genre> query, string orderProperty, SearchOrder order)
+    {
+        var orderedQuery = (orderProperty.ToLower(), order) switch
+        {
+            ("name", SearchOrder.Asc) => query.OrderBy(x => x.Name).ThenBy(x => x.Id),
+            ("name", SearchOrder.Desc) => query.OrderByDescending(x => x.Name).ThenByDescending(x => x.Id),
+            ("id", SearchOrder.Asc) => query.OrderBy(x => x.Id),
+            ("id", SearchOrder.Desc) => query.OrderByDescending(x => x.Id),
+            ("createdat", SearchOrder.Asc) => query.OrderBy(x => x.CreatedAt),
+            ("createdat", SearchOrder.Desc) => query.OrderByDescending(x => x.CreatedAt),
+            _ => query.OrderBy(x => x.Name).ThenBy(x => x.Id)
+        };
+
+        return orderedQuery.ThenBy(x => x.CreatedAt);
     }
 
 }
