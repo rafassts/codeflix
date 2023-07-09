@@ -3,7 +3,6 @@ using Codeflix.Catalog.Domain.SeedWork.SearchableRepository;
 using Codeflix.Catalog.IntegrationTests.Base;
 using DomainEntity = Codeflix.Catalog.Domain.Entity;
 
-
 namespace Codeflix.Catalog.IntegrationTests.Infra.Data.EF.Repositories.GenreRepository;
 
 [CollectionDefinition(nameof(GenreRepositoryTestFixture))]
