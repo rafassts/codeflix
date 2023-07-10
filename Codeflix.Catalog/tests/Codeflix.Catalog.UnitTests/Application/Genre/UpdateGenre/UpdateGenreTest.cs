@@ -206,7 +206,11 @@ public class UpdateGenreTest
         output.IsActive.Should().Be(newIsActive);
         output.CreatedAt.Should().Be(exampleGenre.CreatedAt);
         output.Categories.Should().HaveCount(exampleCategoriesIdsList.Count);
-        exampleCategoriesIdsList.ForEach(x => output.Categories.Should().Contain(x));
+        exampleCategoriesIdsList
+            .ForEach(categoryId => 
+                output.Categories
+                .Should()
+                .Contain(relation => relation.Id == categoryId));
 
     }
 
@@ -260,7 +264,10 @@ public class UpdateGenreTest
         output.IsActive.Should().Be(newIsActive);
         output.CreatedAt.Should().Be(exampleGenre.CreatedAt);
         output.Categories.Should().HaveCount(exampleCategoriesIdsList.Count);
-        exampleCategoriesIdsList.ForEach(x => output.Categories.Should().Contain(x));
+        exampleCategoriesIdsList
+            .ForEach(categoryId => output.Categories
+            .Should()
+            .Contain(relation => relation.Id == categoryId));
 
     }
 
@@ -362,7 +369,10 @@ public class UpdateGenreTest
         output.IsActive.Should().Be(newIsActive);
         output.CreatedAt.Should().Be(exampleGenre.CreatedAt);
         output.Categories.Should().HaveCount(exampleCategoriesIdsList.Count);
-        exampleCategoriesIdsList.ForEach(x => output.Categories.Should().Contain(x));
+        exampleCategoriesIdsList
+            .ForEach(categoryId => output.Categories
+                .Should()
+                .Contain(relation => relation.Id == categoryId));
 
     }
 

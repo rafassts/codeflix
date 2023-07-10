@@ -52,8 +52,8 @@ public class ListGenreTest
             outputItem.CreatedAt.Should().Be(repoGenre!.CreatedAt);
             outputItem.Categories.Should().HaveCount(repoGenre.Categories.Count);
 
-            foreach (var item in repoGenre.Categories)
-                outputItem.Categories.Should().Contain(item);   
+            foreach (var categoryId in repoGenre.Categories)
+                outputItem.Categories.Should().Contain(relation => relation.Id == categoryId);   
 
         });
 

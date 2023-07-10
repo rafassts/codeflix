@@ -25,14 +25,11 @@ public class CategoryUseCasesBaseFixture : BaseFixture
         return description;
     }
     public bool GetRandomIsActive() => new Random().NextDouble() < 0.5;
-
     public DomainEntity.Category GetExampleCategory() => new(
         GetValidCategoryName(),
         GetValidCategoryDescription(),
         GetRandomIsActive()
     );
-
     public List<DomainEntity.Category> GetExampleCategoriesList(int length = 10)
         => Enumerable.Range(1, length).Select(_ => GetExampleCategory()).ToList();
-
 }
