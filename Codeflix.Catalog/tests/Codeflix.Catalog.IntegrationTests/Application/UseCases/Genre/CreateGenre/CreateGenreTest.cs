@@ -116,9 +116,9 @@ public class CreateGenreTest
             .BeEquivalentTo(input.CategoriesIds);
     }
 
-    [Fact(DisplayName = nameof(ThrowWhenCategoryDoesntExist))]
+    [Fact(DisplayName = nameof(CreateThrowsWhenCategoryDoesntExist))]
     [Trait("Integration/Application", "CreateGenre Use Cases")]
-    public async void ThrowWhenCategoryDoesntExist()
+    public async void CreateThrowsWhenCategoryDoesntExist()
     {
 
         var actDbContext = _fixture.CreateDbContext();
