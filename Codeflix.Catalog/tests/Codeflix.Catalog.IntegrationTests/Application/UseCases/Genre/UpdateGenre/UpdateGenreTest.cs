@@ -6,7 +6,6 @@ using Codeflix.Catalog.Infra.Data.EF.Models;
 using Codeflix.Catalog.Infra.Data.EF.Repositories;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using DomainEntity = Codeflix.Catalog.Domain.Entity;
 using UseCase = Codeflix.Catalog.Application.UseCases.Genre.UpdateGenre;
 
 namespace Codeflix.Catalog.IntegrationTests.Application.UseCases.Genre.UpdateGenre;
@@ -179,23 +178,10 @@ public class UpdateGenreTest
     public async Task UpdateThrowsWhenNotFound()
     {
         var arrangeContext = _fixture.CreateDbContext();
-        var exampleCategories = _fixture.GetExampleCategoriesList(10);
         var exampleGenreList = _fixture.GetExampleGenresList(10);
-        var targetGenre = exampleGenreList[5];
-        var relatedCategories = exampleCategories.GetRange(0, 5);
-
-        relatedCategories.ForEach(category => targetGenre.AddCategory(category.Id));
-
-        List<GenresCategories> relations = targetGenre.Categories
-            .Select(categoryId => new GenresCategories(categoryId, targetGenre.Id))
-            .ToList();
 
         await arrangeContext.AddRangeAsync(exampleGenreList);
-        await arrangeContext.AddRangeAsync(exampleCategories);
-        await arrangeContext.AddRangeAsync(relations);
         await arrangeContext.SaveChangesAsync();
-
-        var targetRelatedCategories = exampleCategories.GetRange(5, 3);
 
         var actContext = _fixture.CreateDbContext(true);
 
@@ -204,41 +190,17 @@ public class UpdateGenreTest
             new UnitOfWork(actContext),
             new CategoryRepository(actContext));
 
+        var invalidId = Guid.NewGuid();
+
         var input = new UpdateGenreInput(
-            targetGenre.Id,
+            invalidId,
             _fixture.GetValidGenreName(),
-            !targetGenre.IsActive,
-            targetRelatedCategories.Select(category => category.Id).ToList());
+            true);
 
-        var output = await updateGenre.Handle(input, CancellationToken.None);
+        var action = async() => await updateGenre.Handle(input, CancellationToken.None);
 
-        output.Should().NotBeNull();
-        output.Id.Should().Be(targetGenre.Id);
-        output.Name.Should().Be(input.Name);
-        output.IsActive.Should().Be((bool)input.IsActive!);
-        output.Categories.Should().HaveCount(targetRelatedCategories.Count);
-        output.Categories.Select(relatedCategory => relatedCategory.Id)
-            .ToList()
-            .Should()
-            .BeEquivalentTo(input.CategoriesIds);
-
-        var assertContext = _fixture.CreateDbContext(true);
-        var genreFromDb = await assertContext.Genres.FindAsync(targetGenre.Id);
-
-        genreFromDb.Should().NotBeNull();
-        genreFromDb!.Id.Should().Be(targetGenre.Id);
-        genreFromDb.Name.Should().Be(input.Name);
-        genreFromDb.IsActive.Should().Be((bool)input.IsActive!);
-
-        List<Guid> relatedCategoryIdsFromDb =
-            await assertContext.GenresCategories
-                .AsNoTracking()
-                .Where(relation => relation.GenreId == input.Id)
-                .Select(relation => relation.CategoryId)
-                .ToListAsync();
-
-        relatedCategoryIdsFromDb.Should().BeEquivalentTo(input.CategoriesIds);
-    
+        await action.Should().ThrowAsync<NotFoundException>()
+          .WithMessage($"Genre '{invalidId}' not found");
 
     }
 
