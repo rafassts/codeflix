@@ -16,13 +16,13 @@ public static class ConnectionsConfiguration
     {
         var connectionString = configuration.GetConnectionString("CatalogDb");
 
-        services.AddDbContext<CodeflixCatalogDbContext>(
-            options => options.UseMySql(
-                connectionString,
-                ServerVersion.AutoDetect(connectionString)));
+        //services.AddDbContext<CodeflixCatalogDbContext>(
+        //    options => options.UseMySql(
+        //        connectionString,
+        //        ServerVersion.AutoDetect(connectionString)));
 
-            //services.AddDbContext<CodeflixCatalogDbContext>(
-            //    options => options.UseInMemoryDatabase("e2e-tests-db"));
+        services.AddDbContext<CodeflixCatalogDbContext>(
+            options => options.UseInMemoryDatabase("e2e-tests-db"));
 
         return services;
     }
